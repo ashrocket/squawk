@@ -25,7 +25,11 @@ Rules enforced by file locks:
 - **One talker at a time.** All speech goes through a global speech lock —
   agents queue rather than talk over each other.
 - **One voice per agent.** `voices.json` assigns each agent name a distinct
-  macOS voice on first use (Samantha, Daniel, Karen, Moira, Tessa, Rishi…).
+  voice on first use, best-quality first: the system default voice (assistant
+  only), then Apple Premium/Enhanced voices (download via System Settings >
+  Accessibility > Spoken Content > Manage Voices — auto-detected), then eight
+  local Kokoro neural voices (`kokoro:af_heart` etc., ~6 s synthesis on M1),
+  then compact basics. Delete an agent's line from `voices.json` to re-roll it.
 
 Any Claude Code agent (any cmux tab) can speak to you:
 
