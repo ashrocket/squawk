@@ -1,0 +1,4 @@
+#!/bin/bash
+# Launch the two-way voice assistant from anywhere: ~/ashcode/voice-chat/voice
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$DIR/.venv/bin/python" "$DIR/voice_chat.py" "$@"

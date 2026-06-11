@@ -2,6 +2,7 @@
 """Two-way voice interface to Claude: listen on the mic, think with claude -p, talk back with say."""
 import argparse
 import datetime
+import fcntl
 import json
 import queue
 import re
@@ -33,7 +34,14 @@ VOICE_SYSTEM_PROMPT = (
     "one to three sentences unless the user asks for detail. Never use markdown, "
     "bullet points, code blocks, URLs, or emoji - plain speakable sentences only. "
     "The transcript may contain small speech-to-text errors; infer the intent. "
-    "The user is Ashley, working in ~/ashcode on a Mac."
+    "The user is Ashley, working in ~/ashcode on a Mac. "
+    "About yourself, in case Ashley asks: you are voice_chat.py in ~/ashcode/voice-chat, "
+    "a standalone script using whisper.cpp for hearing, the claude CLI for thinking, and "
+    "the Mac say command for speaking. You are not tied to any particular terminal window. "
+    "To launch you from any shell or cmux tab, run the 'voice' script in that folder. "
+    "Only one copy should run at a time because there is one microphone; a lock enforces this. "
+    "Ashley uses cmux with multiple Claude Code agent windows open. "
+    "To end the conversation Ashley can say goodbye or stop listening."
 )
 
 
@@ -111,7 +119,8 @@ def transcribe(samples, whisper_model):
         w.writeframes(samples.tobytes())
     result = subprocess.run(
         ["whisper-cli", "-m", str(whisper_model), "-f", wav_path,
-         "--no-prints", "--no-timestamps"],
+         "--no-prints", "--no-timestamps",
+         "--prompt", "cmux, Claude Code, Claude agents, zsh, ashcode, whisper, Kokoro, MCP, repo"],
         capture_output=True, text=True, timeout=60,
     )
     Path(wav_path).unlink(missing_ok=True)
@@ -152,6 +161,13 @@ def main():
     ap.add_argument("--greeting", default="Voice link ready. I'm listening. Say goodbye when you're done.")
     args = ap.parse_args()
 
+    lock_handle = open(HERE / ".voice_chat.lock", "w")
+    try:
+        fcntl.flock(lock_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        print("Another voice_chat.py is already running (one mic, one listener). Exiting.")
+        sys.exit(1)
+
     logs_dir = HERE / "logs"
     logs_dir.mkdir(exist_ok=True)
     log_file = logs_dir / f"chat-{datetime.datetime.now():%Y%m%d-%H%M%S}.log"
@@ -176,7 +192,10 @@ def main():
             log_line(log_file, "system", "exit phrase heard, shutting down")
             break
 
+        had_session = session_id
         reply, session_id = ask_claude(text, session_id, args.model)
+        if session_id and not had_session:
+            log_line(log_file, "system", f"claude session: {session_id}")
         reply = strip_for_speech(reply)
         log_line(log_file, "claude", reply)
         speak(reply, args.voice, args.rate)
