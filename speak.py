@@ -26,6 +26,13 @@ REGISTRY_LOCK = HERE / ".voices.lock"
 # the default's quality once downloaded (System Settings > Accessibility >
 # Spoken Content > System Voice > Manage Voices) and are auto-preferred here.
 DEFAULT_VOICE = "default"
+KOKORO_MODEL = HERE / "models" / "kokoro-v1.0.onnx"
+KOKORO_VOICES_BIN = HERE / "models" / "voices-v1.0.bin"
+# Local neural TTS (kokoro-onnx); distinct US/GB voices, female/male alternating.
+KOKORO_VOICES = [
+    "kokoro:af_heart", "kokoro:am_michael", "kokoro:bf_emma", "kokoro:bm_george",
+    "kokoro:af_nicole", "kokoro:am_puck", "kokoro:bf_isabella", "kokoro:bm_lewis",
+]
 CURATED_BASIC = [
     "Karen", "Moira", "Tessa", "Rishi", "Tara", "Aman",
     "Eddy (English (US))", "Flo (English (US))", "Reed (English (UK))",
@@ -46,12 +53,33 @@ def installed_english_voices():
 
 
 def build_pool():
-    """Best available voices, best first: default, Premium, Enhanced, curated basics."""
+    """Best available voices, best first: default, Premium, Enhanced, Kokoro, basics."""
     voices = installed_english_voices()
     premium = sorted(v for v in voices if "(Premium)" in v)
     enhanced = sorted(v for v in voices if "(Enhanced)" in v)
+    kokoro = KOKORO_VOICES if KOKORO_MODEL.exists() and KOKORO_VOICES_BIN.exists() else []
     basics = [v for v in CURATED_BASIC if v in voices]
-    return [DEFAULT_VOICE] + premium + enhanced + basics
+    return [DEFAULT_VOICE] + premium + enhanced + kokoro + basics
+
+
+def synthesize_kokoro(text, kokoro_voice):
+    """Render text to a temp wav with local Kokoro TTS; returns the wav path."""
+    import tempfile
+    import wave
+
+    import numpy as np
+    from kokoro_onnx import Kokoro
+
+    kokoro = Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES_BIN))
+    samples, sr = kokoro.create(text, voice=kokoro_voice, speed=1.0)
+    pcm = (np.clip(samples, -1, 1) * 32767).astype(np.int16)
+    tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+    with wave.open(tmp.name, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(sr)
+        w.writeframes(pcm.tobytes())
+    return tmp.name
 
 
 def voice_for(agent):
@@ -75,13 +103,26 @@ def speak(text, agent="assistant", rate=None, voice=None, announce=False):
     voice = voice or voice_for(agent)
     if announce:
         text = f"{agent.replace('-', ' ')} here. {text}"
+
+    wav = None
+    if voice.startswith("kokoro:"):
+        try:
+            wav = synthesize_kokoro(text, voice.split(":", 1)[1])  # before the lock: don't block other talkers
+        except Exception as exc:
+            print(f"kokoro failed ({exc}); falling back to say", file=sys.stderr)
+            voice = DEFAULT_VOICE
+
     with open(SPEECH_LOCK, "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
-        cmd = ["say"] if voice == DEFAULT_VOICE else ["say", "-v", voice]
-        if rate:
-            cmd += ["-r", str(rate)]
-        cmd.append(text)
-        subprocess.run(cmd, check=False)
+        if wav:
+            subprocess.run(["afplay", wav], check=False)
+            Path(wav).unlink(missing_ok=True)
+        else:
+            cmd = ["say"] if voice == DEFAULT_VOICE else ["say", "-v", voice]
+            if rate:
+                cmd += ["-r", str(rate)]
+            cmd.append(text)
+            subprocess.run(cmd, check=False)
 
 
 def main():
