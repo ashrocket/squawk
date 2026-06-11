@@ -15,6 +15,8 @@ from pathlib import Path
 import numpy as np
 import sounddevice as sd
 
+from speak import speak as speak_serialized
+
 SAMPLE_RATE = 16000
 FRAME_MS = 30
 FRAME_SAMPLES = SAMPLE_RATE * FRAME_MS // 1000
@@ -40,7 +42,10 @@ VOICE_SYSTEM_PROMPT = (
     "the Mac say command for speaking. You are not tied to any particular terminal window. "
     "To launch you from any shell or cmux tab, run the 'voice' script in that folder. "
     "Only one copy should run at a time because there is one microphone; a lock enforces this. "
-    "Ashley uses cmux with multiple Claude Code agent windows open. "
+    "Ashley uses cmux with multiple Claude Code agent windows open. Any of those agents "
+    "can also speak aloud by running the speak script in the voice-chat folder with "
+    "dash dash as and their agent name; each agent gets its own distinct voice and a "
+    "lock ensures only one talks at a time. You alone hold the microphone. "
     "To end the conversation Ashley can say goodbye or stop listening."
 )
 
@@ -53,14 +58,8 @@ def log_line(log_file, role, text):
         f.write(line + "\n")
 
 
-def speak(text, voice=None, rate=None):
-    cmd = ["say"]
-    if voice:
-        cmd += ["-v", voice]
-    if rate:
-        cmd += ["-r", str(rate)]
-    cmd.append(text)
-    subprocess.run(cmd, check=False)
+def speak(text, agent="assistant", voice=None, rate=None):
+    speak_serialized(text, agent=agent, voice=voice, rate=rate)
 
 
 def calibrate_noise(stream_q, frames=20):
@@ -153,6 +152,8 @@ def strip_for_speech(text):
 
 def main():
     ap = argparse.ArgumentParser(description="Two-way voice chat with Claude")
+    ap.add_argument("--as", dest="agent", default="assistant",
+                    help="agent identity; determines the voice (default: assistant)")
     ap.add_argument("--model", default="haiku", help="claude model for replies (default: haiku)")
     ap.add_argument("--whisper-model", default=str(HERE / "models" / "ggml-base.en.bin"))
     ap.add_argument("--voice", default=None, help="say voice, e.g. Samantha")
@@ -173,8 +174,8 @@ def main():
     log_file = logs_dir / f"chat-{datetime.datetime.now():%Y%m%d-%H%M%S}.log"
 
     session_id = None
-    log_line(log_file, "system", f"starting: model={args.model} whisper={Path(args.whisper_model).name}")
-    speak(args.greeting, args.voice, args.rate)
+    log_line(log_file, "system", f"starting: model={args.model} whisper={Path(args.whisper_model).name} agent={args.agent}")
+    speak(args.greeting, agent=args.agent, voice=args.voice, rate=args.rate)
 
     while True:
         try:
@@ -188,7 +189,7 @@ def main():
         log_line(log_file, "you", text)
 
         if any(p in text.lower() for p in EXIT_PHRASES):
-            speak("Goodbye. Ending the voice link.", args.voice, args.rate)
+            speak("Goodbye. Ending the voice link.", agent=args.agent, voice=args.voice, rate=args.rate)
             log_line(log_file, "system", "exit phrase heard, shutting down")
             break
 
@@ -198,7 +199,7 @@ def main():
             log_line(log_file, "system", f"claude session: {session_id}")
         reply = strip_for_speech(reply)
         log_line(log_file, "claude", reply)
-        speak(reply, args.voice, args.rate)
+        speak(reply, agent=args.agent, voice=args.voice, rate=args.rate)
 
 
 if __name__ == "__main__":

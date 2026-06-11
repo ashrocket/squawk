@@ -16,6 +16,26 @@ Speak when you hear "Voice link ready." Say **"goodbye"** or **"stop listening"*
 Options: `--model sonnet` (smarter, slower), `--voice Samantha`, `--rate 210`,
 `--whisper-model models/ggml-small.en.bin` (better accuracy, download separately).
 
+## Multiple agents, one conversation
+
+Rules enforced by file locks:
+
+- **One listener.** Only one `voice_chat.py` can hold the microphone; a second
+  launch exits with a message.
+- **One talker at a time.** All speech goes through a global speech lock —
+  agents queue rather than talk over each other.
+- **One voice per agent.** `voices.json` assigns each agent name a distinct
+  macOS voice on first use (Samantha, Daniel, Karen, Moira, Tessa, Rishi…).
+
+Any Claude Code agent (any cmux tab) can speak to you:
+
+```bash
+~/ashcode/voice-chat/speak --as builder-agent --announce "Tests pass, deploy is live."
+```
+
+`--announce` prefixes the agent's name so you know who's talking even before
+you learn its voice.
+
 ## How it works
 
 mic → energy-based voice detection → whisper-cli (ggml-base.en, Metal) →
