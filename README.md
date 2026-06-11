@@ -18,8 +18,17 @@ Running several Claude Code agents in cmux means status lives in N terminal
 tabs. squawk gives the whole crew one audio channel with rules a radio operator
 would recognize:
 
-- **One listener.** Exactly one process owns the microphone (lock-enforced).
+- **Focus follows mic.** Run `voice` in as many cmux tabs as you like — each
+  becomes a voice agent for that window's project, but only the *focused*
+  window's agent listens. The rest stand by quietly, like tabs waiting for
+  keystrokes. (Terminal focus reporting; works in Ghostty/cmux, iTerm2, xterm.)
+- **Conversations hold the con.** An active exchange keeps the mic for 75s past
+  the last turn, even if your focus drifts — nobody steals the channel mid-thought.
 - **One talker.** A global speech lock — agents queue, never talk over each other.
+- **Barge-in (experimental).** Start talking over the assistant and it stops to listen.
+- **Relay requests.** Background agents don't grab the speakers mid-conversation;
+  `speak --relay "need a review on PR 12"` queues a message the active
+  conversation reads aloud between turns.
 - **Distinct voices.** Each agent name is auto-assigned its own voice, best
   available first: your system default, then Apple Premium, then Kokoro neural,
   then Apple Enhanced. Assignments persist in `voices.json`.
@@ -35,6 +44,11 @@ git clone https://github.com/ashrocket/squawk && cd squawk
 ```
 
 Say **"goodbye"**, **"stop listening"**, or **"over and out"** to end.
+
+Run it per project window: `cd ~/code/my-project && ~/path/to/squawk/voice` —
+the agent names itself after the directory, gets its own voice, and its brain
+runs *in that directory*, so it can read the project's files when you ask about
+them. Click into a window to talk to that project's agent.
 
 Let any agent (any cmux tab, any script) report in:
 
@@ -80,8 +94,11 @@ macOS (Apple Silicon recommended), Homebrew, Python 3.10+, Claude Code CLI.
 - [x] Two-way voice loop, local STT/TTS
 - [x] Multi-agent: speech lock, voice registry, `speak` CLI
 - [x] Pronunciation lexicon agents learn (`--teach`, or by voice)
+- [x] Window-aware: one agent per cmux tab, focus follows mic, conversations hold the con
+- [x] Relay queue: background agents message the active conversation
+- [x] Barge-in v1 (experimental; bleed-aware thresholding, no echo cancellation yet)
 - [ ] Talk to your *current* Claude Code session, not a fresh one
-- [ ] Barge-in (interrupt the assistant mid-sentence)
+- [ ] STT-side pronunciation learning (recognize taught words in *your* speech)
 - [ ] Kokoro daemon for instant neural synthesis
 - [ ] Wake word / push-to-talk modes
 - [ ] Demo video

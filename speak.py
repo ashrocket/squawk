@@ -14,10 +14,12 @@ import json
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SPEECH_LOCK = HERE / ".speech.lock"
+INBOX = HERE / "inbox"
 REGISTRY = HERE / "voices.json"
 REGISTRY_LOCK = HERE / ".voices.lock"
 LEXICON = HERE / "lexicon.json"
@@ -123,8 +125,19 @@ def apply_lexicon(text):
     return text
 
 
-def speak(text, agent="assistant", rate=None, voice=None, announce=False):
-    """Speak text aloud; blocks until no other agent is talking."""
+def relay(text, agent="agent"):
+    """Queue a short message for the active voice conversation to read aloud."""
+    INBOX.mkdir(exist_ok=True)
+    (INBOX / f"{time.time_ns()}-{agent}.json").write_text(
+        json.dumps({"from": agent.replace("-", " "), "text": text}))
+
+
+def speak(text, agent="assistant", rate=None, voice=None, announce=False, interrupt_check=None):
+    """Speak text aloud; blocks until no other agent is talking.
+
+    interrupt_check: optional callable polled during playback; return True to cut
+    the speech off. Returns False if playback was interrupted, True otherwise.
+    """
     voice = voice or voice_for(agent)
     if announce:
         text = f"{agent.replace('-', ' ')} here. {text}"
@@ -141,14 +154,27 @@ def speak(text, agent="assistant", rate=None, voice=None, announce=False):
     with open(SPEECH_LOCK, "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
         if wav:
-            subprocess.run(["afplay", wav], check=False)
-            Path(wav).unlink(missing_ok=True)
+            cmd = ["afplay", wav]
         else:
             cmd = ["say"] if voice == DEFAULT_VOICE else ["say", "-v", voice]
             if rate:
                 cmd += ["-r", str(rate)]
             cmd.append(text)
-            subprocess.run(cmd, check=False)
+        proc = subprocess.Popen(cmd)
+        completed = True
+        if interrupt_check is None:
+            proc.wait()
+        else:
+            while proc.poll() is None:
+                if interrupt_check():
+                    proc.terminate()
+                    completed = False
+                    break
+                time.sleep(0.08)
+            proc.wait()
+        if wav:
+            Path(wav).unlink(missing_ok=True)
+        return completed
 
 
 def main():
@@ -161,6 +187,9 @@ def main():
                     help="prefix speech with the agent's name")
     ap.add_argument("--teach", action="append", metavar="WORD=PHONETIC",
                     help='fix a pronunciation, e.g. --teach "cmux=sea mux"')
+    ap.add_argument("--relay", action="store_true",
+                    help="don't speak now; queue the message for the active voice "
+                         "conversation to read aloud between turns")
     ap.add_argument("text", nargs="*", help="text to speak (or pipe via stdin)")
     args = ap.parse_args()
 
@@ -173,6 +202,10 @@ def main():
     text = text.strip()
     if not text:
         sys.exit(0)
+    if args.relay:
+        relay(text, agent=args.agent)
+        print("queued for relay (delivered when a voice conversation is active)")
+        return
     speak(text, agent=args.agent, rate=args.rate, voice=args.voice, announce=args.announce)
 
 
