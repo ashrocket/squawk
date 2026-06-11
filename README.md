@@ -97,9 +97,9 @@ macOS (Apple Silicon recommended), Homebrew, Python 3.10+, Claude Code CLI.
 - [x] Window-aware: one agent per cmux tab, focus follows mic, conversations hold the con
 - [x] Relay queue: background agents message the active conversation
 - [x] Barge-in v1 (experimental; bleed-aware thresholding, no echo cancellation yet)
+- [x] STT-side pronunciation learning (recognize taught words in *your* speech)
+- [x] Kokoro daemon: model stays resident, spawned on demand, exits after 10 idle minutes
 - [ ] Talk to your *current* Claude Code session, not a fresh one
-- [ ] STT-side pronunciation learning (recognize taught words in *your* speech)
-- [ ] Kokoro daemon for instant neural synthesis
 - [ ] Wake word / push-to-talk modes
 - [ ] Demo video
 

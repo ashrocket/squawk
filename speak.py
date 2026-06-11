@@ -12,6 +12,7 @@ import argparse
 import fcntl
 import json
 import re
+import socket
 import subprocess
 import sys
 import time
@@ -69,8 +70,24 @@ def build_pool():
     return [DEFAULT_VOICE] + premium + kokoro + enhanced + basics
 
 
-def synthesize_kokoro(text, kokoro_voice):
-    """Render text to a temp wav with local Kokoro TTS; returns the wav path."""
+KOKORO_SOCKET = HERE / ".kokoro.sock"
+
+
+def _kokoro_daemon_request(text, kokoro_voice, timeout=45):
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    try:
+        sock.connect(str(KOKORO_SOCKET))
+        sock.sendall((json.dumps({"text": text, "voice": kokoro_voice}) + "\n").encode())
+        response = json.loads(sock.makefile().readline())
+    finally:
+        sock.close()
+    if "wav" in response:
+        return response["wav"]
+    raise RuntimeError(response.get("error", "kokoro daemon error"))
+
+
+def _synthesize_in_process(text, kokoro_voice):
     import tempfile
     import wave
 
@@ -87,6 +104,33 @@ def synthesize_kokoro(text, kokoro_voice):
         w.setframerate(sr)
         w.writeframes(pcm.tobytes())
     return tmp.name
+
+
+def synthesize_kokoro(text, kokoro_voice):
+    """Render text to a temp wav; prefers the resident daemon, spawning it on demand.
+
+    The daemon keeps the model loaded for instant synthesis and exits itself
+    after 10 idle minutes. Falls back to in-process synthesis if it won't start.
+    """
+    try:
+        return _kokoro_daemon_request(text, kokoro_voice)
+    except (OSError, RuntimeError, json.JSONDecodeError):
+        pass
+
+    logs = HERE / "logs"
+    logs.mkdir(exist_ok=True)
+    with open(logs / "kokoro-daemon.log", "a") as out:
+        subprocess.Popen([sys.executable, str(HERE / "kokoro_daemon.py")],
+                         stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
+    deadline = time.time() + 25
+    while time.time() < deadline:
+        try:
+            return _kokoro_daemon_request(text, kokoro_voice)
+        except (OSError, json.JSONDecodeError):
+            time.sleep(0.3)
+        except RuntimeError:
+            break  # daemon answered with an error; don't retry it
+    return _synthesize_in_process(text, kokoro_voice)
 
 
 def voice_for(agent):
