@@ -11,6 +11,7 @@ agent name to its own macOS voice, assigned from a pool on first use.
 import argparse
 import fcntl
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -20,12 +21,37 @@ SPEECH_LOCK = HERE / ".speech.lock"
 REGISTRY = HERE / "voices.json"
 REGISTRY_LOCK = HERE / ".voices.lock"
 
-# Ordered for maximum distinctness: US, GB, AU, IE, ZA, IN accents first.
-VOICE_POOL = [
-    "Samantha", "Daniel", "Karen", "Moira", "Tessa", "Rishi", "Tara", "Aman",
+# The system default voice (no -v flag) is by far the best quality installed.
+# Named compact voices are noticeably worse; Apple Premium/Enhanced voices match
+# the default's quality once downloaded (System Settings > Accessibility >
+# Spoken Content > System Voice > Manage Voices) and are auto-preferred here.
+DEFAULT_VOICE = "default"
+CURATED_BASIC = [
+    "Karen", "Moira", "Tessa", "Rishi", "Tara", "Aman",
     "Eddy (English (US))", "Flo (English (US))", "Reed (English (UK))",
     "Rocko (English (US))", "Sandy (English (UK))", "Shelley (English (US))",
+    "Samantha", "Daniel",
 ]
+VOICE_LINE = re.compile(r"^(.*?)\s+en[_-][A-Z]{2}\s+#")
+
+
+def installed_english_voices():
+    try:
+        out = subprocess.run(["say", "-v", "?"], capture_output=True, text=True,
+                             timeout=10).stdout
+    except OSError:
+        return []
+    return [m.group(1).strip() for line in out.splitlines()
+            if (m := VOICE_LINE.match(line))]
+
+
+def build_pool():
+    """Best available voices, best first: default, Premium, Enhanced, curated basics."""
+    voices = installed_english_voices()
+    premium = sorted(v for v in voices if "(Premium)" in v)
+    enhanced = sorted(v for v in voices if "(Enhanced)" in v)
+    basics = [v for v in CURATED_BASIC if v in voices]
+    return [DEFAULT_VOICE] + premium + enhanced + basics
 
 
 def voice_for(agent):
@@ -34,10 +60,11 @@ def voice_for(agent):
         fcntl.flock(lk, fcntl.LOCK_EX)
         registry = json.loads(REGISTRY.read_text()) if REGISTRY.exists() else {}
         if agent not in registry:
+            pool = build_pool()
             used = set(registry.values())
             registry[agent] = next(
-                (v for v in VOICE_POOL if v not in used),
-                VOICE_POOL[sum(agent.encode()) % len(VOICE_POOL)],
+                (v for v in pool if v not in used),
+                pool[sum(agent.encode()) % len(pool)],
             )
             REGISTRY.write_text(json.dumps(registry, indent=2) + "\n")
         return registry[agent]
@@ -50,7 +77,7 @@ def speak(text, agent="assistant", rate=None, voice=None, announce=False):
         text = f"{agent.replace('-', ' ')} here. {text}"
     with open(SPEECH_LOCK, "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
-        cmd = ["say", "-v", voice]
+        cmd = ["say"] if voice == DEFAULT_VOICE else ["say", "-v", voice]
         if rate:
             cmd += ["-r", str(rate)]
         cmd.append(text)
