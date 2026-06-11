@@ -26,7 +26,8 @@ from pathlib import Path
 import numpy as np
 import sounddevice as sd
 
-from speak import INBOX, SPEECH_LOCK, speak as speak_serialized, teach
+from speak import (INBOX, SPEECH_LOCK, lexicon_words, reverse_lexicon,
+                   speak as speak_serialized, teach)
 
 SAMPLE_RATE = 16000
 FRAME_MS = 30
@@ -266,17 +267,20 @@ def transcribe(samples, whisper_model):
         w.setsampwidth(2)
         w.setframerate(SAMPLE_RATE)
         w.writeframes(samples.tobytes())
+    vocab = "Claude Code, Claude agents, zsh, whisper, Kokoro, MCP, repo, squawk"
+    taught = [w for w in lexicon_words() if w.lower() not in vocab.lower()]
+    if taught:
+        vocab += ", " + ", ".join(taught)
     result = subprocess.run(
         ["whisper-cli", "-m", str(whisper_model), "-f", wav_path,
-         "--no-prints", "--no-timestamps",
-         "--prompt", "cmux, Claude Code, Claude agents, zsh, ashcode, whisper, Kokoro, MCP, repo"],
+         "--no-prints", "--no-timestamps", "--prompt", vocab],
         capture_output=True, text=True, timeout=60,
     )
     Path(wav_path).unlink(missing_ok=True)
     text = result.stdout.strip()
     if not text or JUNK_PATTERNS.match(text):
         return None
-    return text
+    return reverse_lexicon(text)
 
 
 def ask_claude(prompt, session_id, model, system_prompt):
@@ -406,6 +410,10 @@ def main():
             pronounce = PRONOUNCE_RE.search(text)
             if pronounce:
                 word, phonetic = pronounce.group(1).strip(" ,.'\""), pronounce.group(2).strip(" ,.'\"")
+                if word.lower() == phonetic.lower():
+                    # reverse_lexicon already canonicalized the phonetic - nothing new to learn
+                    speak_out(f"{word} already sounds like that to me.")
+                    continue
                 teach(word, phonetic)
                 squashed = re.sub(r"[\s\-.]+", "", word)
                 if squashed.lower() != word.lower():

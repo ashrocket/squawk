@@ -125,6 +125,26 @@ def apply_lexicon(text):
     return text
 
 
+def reverse_lexicon(text):
+    """STT side: map phonetic spellings the recognizer heard back to canonical words.
+
+    Longer phonetics first so 'sea mux deluxe' wins over 'sea mux'. Tokens may be
+    joined by spaces or hyphens in the transcript.
+    """
+    for word, phonetic in sorted(load_lexicon().items(), key=lambda kv: -len(kv[1])):
+        tokens = [re.escape(t) for t in phonetic.split()]
+        if not tokens:
+            continue
+        pattern = r"\b" + r"[\s\-]+".join(tokens) + r"\b"
+        text = re.sub(pattern, word, text, flags=re.IGNORECASE)
+    return text
+
+
+def lexicon_words():
+    """Canonical taught words, for biasing the speech recognizer's vocabulary."""
+    return list(load_lexicon().keys())
+
+
 def relay(text, agent="agent"):
     """Queue a short message for the active voice conversation to read aloud."""
     INBOX.mkdir(exist_ok=True)
