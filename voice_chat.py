@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 import sounddevice as sd
 
-from speak import SPEECH_LOCK, speak as speak_serialized
+from speak import SPEECH_LOCK, speak as speak_serialized, teach
 
 SAMPLE_RATE = 16000
 FRAME_MS = 30
@@ -33,24 +33,25 @@ EXIT_PHRASES = ("goodbye", "good bye", "stop listening", "shut down",
                 "exit now", "quit now", "over and out")
 JUNK_PATTERNS = re.compile(r"^[\s\[\(\.\,\!\?]*(\[BLANK_AUDIO\]|\(.*?\)|\[.*?\])?[\s\.\,\!\?]*$")
 
-VOICE_SYSTEM_PROMPT = (
-    "You are a voice assistant. The user speaks to you through a microphone and your "
-    "replies are read aloud by text-to-speech. Keep replies short and conversational: "
-    "one to three sentences unless the user asks for detail. Never use markdown, "
-    "bullet points, code blocks, URLs, or emoji - plain speakable sentences only. "
-    "The transcript may contain small speech-to-text errors; infer the intent. "
-    "The user is Ashley, working in ~/ashcode on a Mac. "
-    "About yourself, in case Ashley asks: you are voice_chat.py in ~/ashcode/voice-chat, "
-    "a standalone script using whisper.cpp for hearing, the claude CLI for thinking, and "
-    "the Mac say command for speaking. You are not tied to any particular terminal window. "
-    "To launch you from any shell or cmux tab, run the 'voice' script in that folder. "
-    "Only one copy should run at a time because there is one microphone; a lock enforces this. "
-    "Ashley uses cmux with multiple Claude Code agent windows open. Any of those agents "
-    "can also speak aloud by running the speak script in the voice-chat folder with "
-    "dash dash as and their agent name; each agent gets its own distinct voice and a "
-    "lock ensures only one talks at a time. You alone hold the microphone. "
-    "Ashley likes radio protocol: end every reply with the single word Over. "
-    "To end the conversation Ashley can say goodbye, stop listening, or over and out."
+PRONOUNCE_RE = re.compile(
+    r"\b(?:pronounce|pronounced?|say)\s+(.{1,40}?)\s+(?:as|like)\s+(.{1,60}?)[.!?]*$", re.IGNORECASE)
+
+VOICE_SYSTEM_PROMPT_TEMPLATE = (
+    "You are a voice assistant named squawk. {user} speaks to you through a microphone "
+    "and your replies are read aloud by text-to-speech. Keep replies short and "
+    "conversational: one to three sentences unless {user} asks for detail. Never use "
+    "markdown, bullet points, code blocks, URLs, or emoji - plain speakable sentences "
+    "only. The transcript may contain small speech-to-text errors; infer the intent. "
+    "About yourself, in case {user} asks: you are voice_chat.py in the squawk project, "
+    "using whisper.cpp for hearing, the claude CLI for thinking, and macOS speech for "
+    "talking. You are not tied to any terminal window; the 'voice' script in the project "
+    "folder launches you from any shell or cmux tab, and a lock ensures only one of you "
+    "listens at a time. {user} runs multiple Claude Code agents in cmux; any agent can "
+    "speak aloud through the 'speak' script with its own assigned voice, one at a time. "
+    "You alone hold the microphone. If {user} wants a word pronounced differently, they "
+    "can say: pronounce WORD as PHONETIC. {user} likes radio protocol: end every reply "
+    "with the single word Over. To end the conversation {user} can say goodbye, stop "
+    "listening, or over and out."
 )
 
 
@@ -152,9 +153,9 @@ def transcribe(samples, whisper_model):
     return text
 
 
-def ask_claude(prompt, session_id, model):
+def ask_claude(prompt, session_id, model, system_prompt):
     cmd = ["claude", "-p", prompt, "--output-format", "json", "--model", model,
-           "--append-system-prompt", VOICE_SYSTEM_PROMPT]
+           "--append-system-prompt", system_prompt]
     if session_id:
         cmd += ["--resume", session_id]
     try:
@@ -177,6 +178,7 @@ def main():
     ap = argparse.ArgumentParser(description="Two-way voice chat with Claude")
     ap.add_argument("--as", dest="agent", default="assistant",
                     help="agent identity; determines the voice (default: assistant)")
+    ap.add_argument("--user", default="the user", help="how the assistant should refer to you")
     ap.add_argument("--model", default="haiku", help="claude model for replies (default: haiku)")
     ap.add_argument("--whisper-model", default=str(HERE / "models" / "ggml-base.en.bin"))
     ap.add_argument("--voice", default=None, help="say voice, e.g. Samantha")
@@ -197,6 +199,7 @@ def main():
     log_file = logs_dir / f"chat-{datetime.datetime.now():%Y%m%d-%H%M%S}.log"
 
     session_id = None
+    system_prompt = VOICE_SYSTEM_PROMPT_TEMPLATE.format(user=args.user)
     log_line(log_file, "system", f"starting: model={args.model} whisper={Path(args.whisper_model).name} agent={args.agent}")
     speak(args.greeting, agent=args.agent, voice=args.voice, rate=args.rate)
 
@@ -216,8 +219,20 @@ def main():
             log_line(log_file, "system", "exit phrase heard, shutting down")
             break
 
+        pronounce = PRONOUNCE_RE.search(text)
+        if pronounce:
+            word, phonetic = pronounce.group(1).strip(" ,.'\""), pronounce.group(2).strip(" ,.'\"")
+            teach(word, phonetic)
+            squashed = re.sub(r"[\s\-.]+", "", word)
+            if squashed.lower() != word.lower():
+                teach(squashed, phonetic)  # whisper often hears compound names with spaces
+            log_line(log_file, "system", f"learned pronunciation: {word} -> {phonetic}")
+            speak(f"Learned. {word} now sounds like this: {word}. Over.",
+                  agent=args.agent, voice=args.voice, rate=args.rate)
+            continue
+
         had_session = session_id
-        reply, session_id = ask_claude(text, session_id, args.model)
+        reply, session_id = ask_claude(text, session_id, args.model, system_prompt)
         if session_id and not had_session:
             log_line(log_file, "system", f"claude session: {session_id}")
         reply = strip_for_speech(reply)

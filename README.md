@@ -1,57 +1,89 @@
-# voice-chat
+# squawk
 
-Two-way voice conversation with Claude on macOS. Fully local ears and voice:
-whisper.cpp (Metal) for speech-to-text, macOS `say` for text-to-speech, and the
-Claude Code CLI (`claude -p`) as the brain — no API key required.
+**Voices for your Claude Code agents on macOS.** Talk to Claude hands-free, and
+let every agent in your [cmux](https://cmux.sh) setup speak to you — one at a
+time, each with its own voice.
 
-## Run
+Fully local ears and voices: whisper.cpp (Metal) for speech-to-text, macOS
+neural voices or Kokoro for text-to-speech, and the Claude Code CLI as the
+brain. No API key, nothing leaves your Mac except what you already send to
+Claude.
 
-```bash
-cd ~/ashcode/voice-chat
-.venv/bin/python voice_chat.py
-```
+> 🚧 Built in public for Mac developers running multiple Claude Code agents.
+> Watch the repo — this is moving fast.
 
-Speak when you hear "Voice link ready." Say **"goodbye"** or **"stop listening"** to end.
+## Why
 
-Options: `--model sonnet` (smarter, slower), `--voice Samantha`, `--rate 210`,
-`--whisper-model models/ggml-small.en.bin` (better accuracy, download separately).
+Running several Claude Code agents in cmux means status lives in N terminal
+tabs. squawk gives the whole crew one audio channel with rules a radio operator
+would recognize:
 
-## Multiple agents, one conversation
+- **One listener.** Exactly one process owns the microphone (lock-enforced).
+- **One talker.** A global speech lock — agents queue, never talk over each other.
+- **Distinct voices.** Each agent name is auto-assigned its own voice, best
+  available first: your system default, then Apple Premium, then Kokoro neural,
+  then Apple Enhanced. Assignments persist in `voices.json`.
+- **Radio protocol.** The assistant ends turns with "Over." Say "over and out"
+  to sign off.
 
-Rules enforced by file locks:
-
-- **One listener.** Only one `voice_chat.py` can hold the microphone; a second
-  launch exits with a message.
-- **One talker at a time.** All speech goes through a global speech lock —
-  agents queue rather than talk over each other.
-- **One voice per agent.** `voices.json` assigns each agent name a distinct
-  voice on first use, best-quality first: the system default voice (assistant
-  only), then Apple Premium/Enhanced voices (download via System Settings >
-  Accessibility > Spoken Content > Manage Voices — auto-detected), then eight
-  local Kokoro neural voices (`kokoro:af_heart` etc., ~6 s synthesis on M1),
-  then compact basics. Delete an agent's line from `voices.json` to re-roll it.
-
-Any Claude Code agent (any cmux tab) can speak to you:
+## Quick start
 
 ```bash
-~/ashcode/voice-chat/speak --as builder-agent --announce "Tests pass, deploy is live."
+git clone https://github.com/ashrocket/squawk && cd squawk
+./setup.sh
+./voice --user YourName        # two-way conversation; speak when greeted
 ```
 
-`--announce` prefixes the agent's name so you know who's talking even before
-you learn its voice.
+Say **"goodbye"**, **"stop listening"**, or **"over and out"** to end.
+
+Let any agent (any cmux tab, any script) report in:
+
+```bash
+./speak --as builder --announce "Tests pass, deploy is live."
+```
+
+## Teach pronunciations (agents learn)
+
+TTS butchers developer words. Fix them once, every agent learns instantly:
+
+```bash
+./speak --teach "cmux=sea mux"
+```
+
+Or just say it mid-conversation: *"pronounce cmux as sea mux."* Corrections
+persist in `lexicon.json` and apply to all voices, including Kokoro.
 
 ## How it works
 
-mic → energy-based voice detection → whisper-cli (ggml-base.en, Metal) →
-`claude -p --resume <session>` with a voice-style system prompt → `say` → loop.
+```
+mic ──▶ voice detection ──▶ whisper.cpp (Metal) ──▶ claude -p --resume
+                                                          │
+speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀───┘
+```
 
-Transcripts are logged to `logs/`. See `docs/specs/2026-06-11-voice-chat-design.md`
-for the design, research notes, and upgrade paths (Kokoro TTS, Agent SDK persistent
-session, barge-in).
+- `voice_chat.py` — the conversation loop (mic owner). Energy-based voice
+  detection with noise-floor calibration; echo-proof: it ignores the mic while
+  any agent holds the speech lock.
+- `speak.py` — the shared voice box: speech lock, voice registry, pronunciation
+  lexicon, Kokoro synthesis. Also a CLI.
+- The brain is `claude -p` with session resume — conversation continuity with
+  whatever model you choose (`--model sonnet` for smarter, slower replies).
 
 ## Requirements
 
-- `brew install whisper-cpp ffmpeg`
-- `python3 -m venv .venv && .venv/bin/pip install sounddevice numpy`
-- `models/ggml-base.en.bin` from huggingface.co/ggerganov/whisper.cpp
-- Claude Code CLI logged in
+macOS (Apple Silicon recommended), Homebrew, Python 3.10+, Claude Code CLI.
+~150MB disk for whisper, +340MB optional for Kokoro. Runs comfortably on an
+8GB M1.
+
+## Roadmap (building in public)
+
+- [x] Two-way voice loop, local STT/TTS
+- [x] Multi-agent: speech lock, voice registry, `speak` CLI
+- [x] Pronunciation lexicon agents learn (`--teach`, or by voice)
+- [ ] Talk to your *current* Claude Code session, not a fresh one
+- [ ] Barge-in (interrupt the assistant mid-sentence)
+- [ ] Kokoro daemon for instant neural synthesis
+- [ ] Wake word / push-to-talk modes
+- [ ] Demo video
+
+MIT © Ashley Raiteri

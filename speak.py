@@ -20,6 +20,8 @@ HERE = Path(__file__).resolve().parent
 SPEECH_LOCK = HERE / ".speech.lock"
 REGISTRY = HERE / "voices.json"
 REGISTRY_LOCK = HERE / ".voices.lock"
+LEXICON = HERE / "lexicon.json"
+LEXICON_LOCK = HERE / ".lexicon.lock"
 
 # The system default voice (no -v flag) is by far the best quality installed.
 # Named compact voices are noticeably worse; Apple Premium/Enhanced voices match
@@ -101,11 +103,32 @@ def voice_for(agent):
         return registry[agent]
 
 
+def load_lexicon():
+    return json.loads(LEXICON.read_text()) if LEXICON.exists() else {}
+
+
+def teach(word, phonetic):
+    """Persist a pronunciation fix; every agent picks it up on its next sentence."""
+    with open(LEXICON_LOCK, "w") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        lexicon = load_lexicon()
+        lexicon[word.strip().lower()] = phonetic.strip()
+        LEXICON.write_text(json.dumps(lexicon, indent=2) + "\n")
+
+
+def apply_lexicon(text):
+    """Rewrite words the TTS mispronounces (lexicon.json: word -> phonetic spelling)."""
+    for word, phonetic in load_lexicon().items():
+        text = re.sub(rf"\b{re.escape(word)}\b", phonetic, text, flags=re.IGNORECASE)
+    return text
+
+
 def speak(text, agent="assistant", rate=None, voice=None, announce=False):
     """Speak text aloud; blocks until no other agent is talking."""
     voice = voice or voice_for(agent)
     if announce:
         text = f"{agent.replace('-', ' ')} here. {text}"
+    text = apply_lexicon(text)
 
     wav = None
     if voice.startswith("kokoro:"):
@@ -136,10 +159,17 @@ def main():
     ap.add_argument("--voice", default=None, help="override the assigned voice")
     ap.add_argument("--announce", action="store_true",
                     help="prefix speech with the agent's name")
+    ap.add_argument("--teach", action="append", metavar="WORD=PHONETIC",
+                    help='fix a pronunciation, e.g. --teach "cmux=sea mux"')
     ap.add_argument("text", nargs="*", help="text to speak (or pipe via stdin)")
     args = ap.parse_args()
 
-    text = " ".join(args.text) if args.text else sys.stdin.read()
+    for pair in args.teach or []:
+        word, _, phonetic = pair.partition("=")
+        teach(word, phonetic)
+        print(f"learned: {word.strip().lower()} -> {phonetic.strip()}")
+
+    text = " ".join(args.text) if args.text else ("" if args.teach else sys.stdin.read())
     text = text.strip()
     if not text:
         sys.exit(0)
