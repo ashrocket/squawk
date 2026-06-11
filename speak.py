@@ -53,13 +53,16 @@ def installed_english_voices():
 
 
 def build_pool():
-    """Best available voices, best first: default, Premium, Enhanced, Kokoro, basics."""
+    """Best available voices, best first: default, Premium, Kokoro, Enhanced, basics.
+
+    Kokoro outranks Enhanced per Ashley's listening test (Allison Enhanced: "too robotic").
+    """
     voices = installed_english_voices()
     premium = sorted(v for v in voices if "(Premium)" in v)
     enhanced = sorted(v for v in voices if "(Enhanced)" in v)
     kokoro = KOKORO_VOICES if KOKORO_MODEL.exists() and KOKORO_VOICES_BIN.exists() else []
     basics = [v for v in CURATED_BASIC if v in voices]
-    return [DEFAULT_VOICE] + premium + enhanced + kokoro + basics
+    return [DEFAULT_VOICE] + premium + kokoro + enhanced + basics
 
 
 def synthesize_kokoro(text, kokoro_voice):

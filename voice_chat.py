@@ -9,13 +9,14 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import wave
 from pathlib import Path
 
 import numpy as np
 import sounddevice as sd
 
-from speak import speak as speak_serialized
+from speak import SPEECH_LOCK, speak as speak_serialized
 
 SAMPLE_RATE = 16000
 FRAME_MS = 30
@@ -25,9 +26,11 @@ SPEECH_START_FRAMES = 5       # ~150 ms above threshold to count as speech
 TRAILING_SILENCE_S = 1.1      # silence that ends an utterance
 MAX_UTTERANCE_S = 45
 CLAUDE_TIMEOUT_S = 150
+ECHO_GRACE_S = 0.7            # ignore mic this long after any agent stops talking
 
 HERE = Path(__file__).resolve().parent
-EXIT_PHRASES = ("goodbye", "good bye", "stop listening", "shut down", "exit now", "quit now")
+EXIT_PHRASES = ("goodbye", "good bye", "stop listening", "shut down",
+                "exit now", "quit now", "over and out")
 JUNK_PATTERNS = re.compile(r"^[\s\[\(\.\,\!\?]*(\[BLANK_AUDIO\]|\(.*?\)|\[.*?\])?[\s\.\,\!\?]*$")
 
 VOICE_SYSTEM_PROMPT = (
@@ -46,7 +49,8 @@ VOICE_SYSTEM_PROMPT = (
     "can also speak aloud by running the speak script in the voice-chat folder with "
     "dash dash as and their agent name; each agent gets its own distinct voice and a "
     "lock ensures only one talks at a time. You alone hold the microphone. "
-    "To end the conversation Ashley can say goodbye or stop listening."
+    "Ashley likes radio protocol: end every reply with the single word Over. "
+    "To end the conversation Ashley can say goodbye, stop listening, or over and out."
 )
 
 
@@ -72,6 +76,16 @@ def calibrate_noise(stream_q, frames=20):
     return max(180.0, floor * 3.5)
 
 
+def another_agent_talking():
+    """True while any agent holds the global speech lock (i.e. audio is playing)."""
+    try:
+        with open(SPEECH_LOCK, "w") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return False
+    except OSError:
+        return True
+
+
 def listen_for_utterance(device=None):
     """Block until a complete spoken utterance is captured; return int16 samples."""
     stream_q = queue.Queue()
@@ -87,9 +101,18 @@ def listen_for_utterance(device=None):
         max_frames = int(MAX_UTTERANCE_S * 1000 / FRAME_MS)
         silent_run = 0
         in_speech = False
+        lock_seen_at = 0.0
 
         while True:
             frame = stream_q.get()
+            if another_agent_talking():
+                # That's a speaker, not Ashley - drop everything heard so far.
+                lock_seen_at = time.monotonic()
+                pre_roll, voiced, speech_frames, silent_run = [], [], 0, 0
+                in_speech = False
+                continue
+            if not in_speech and time.monotonic() - lock_seen_at < ECHO_GRACE_S:
+                continue
             rms = float(np.sqrt(np.mean(frame.astype(np.float64) ** 2)))
 
             if not in_speech:
