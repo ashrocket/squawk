@@ -30,8 +30,8 @@ would recognize:
   `speak --relay "need a review on PR 12"` queues a message the active
   conversation reads aloud between turns.
 - **Distinct voices.** Each agent name is auto-assigned its own voice, best
-  available first: your system default, then Apple Premium, then Kokoro neural,
-  then Apple Enhanced. Assignments persist in `voices.json`.
+  available first: your system default, then Kokoro neural, then Apple Premium.
+  Assignments persist in `voices.json`.
 - **Radio protocol.** The assistant ends turns with "Over." Say "over and out"
   to sign off.
 
@@ -55,6 +55,26 @@ Let any agent (any cmux tab, any script) report in:
 ```bash
 ./speak --as builder --announce "Tests pass, deploy is live."
 ```
+
+## Squawk.app — installer & settings panel
+
+Prefer clicking to shell scripts? Build the developer-focused mac app
+(no App Store, ad-hoc signed):
+
+```bash
+./app/build_app.sh && open app/Squawk.app
+```
+
+- **Install** — the setup checks as live status rows, one-click install for
+  anything missing (whisper.cpp, models, Python env, Kokoro).
+- **Voices** — audition every installed voice and check the ones agents may
+  use; selections persist to `pool.json`, which `speak` honors. Reassign
+  agents, and jump to System Settings to delete unused system voices (they're
+  SIP-protected, so only Apple's UI can remove them).
+- **Lexicon** — view and teach pronunciations.
+
+There's also a hover-to-audition web gallery: `python3 gallery/build.py &&
+open gallery/index.html` — each voice picks up the poem where the last left off.
 
 ## Teach pronunciations (agents learn)
 

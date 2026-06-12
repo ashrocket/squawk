@@ -3,3 +3,8 @@ logs/
 models/
 __pycache__/
 inbox/
+app/.build/
+app/Squawk.app/
+gallery/audio/
+gallery/index.html
+pool.json

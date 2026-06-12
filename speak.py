@@ -38,12 +38,8 @@ KOKORO_VOICES = [
     "kokoro:af_heart", "kokoro:am_michael", "kokoro:bf_emma", "kokoro:bm_george",
     "kokoro:af_nicole", "kokoro:am_puck", "kokoro:bf_isabella", "kokoro:bm_lewis",
 ]
-CURATED_BASIC = [
-    "Karen", "Moira", "Tessa", "Rishi", "Tara", "Aman",
-    "Eddy (English (US))", "Flo (English (US))", "Reed (English (UK))",
-    "Rocko (English (US))", "Sandy (English (UK))", "Shelley (English (US))",
-    "Samantha", "Daniel",
-]
+# Optional explicit pool written by the Squawk settings app; ordered, best first.
+POOL_FILE = HERE / "pool.json"
 VOICE_LINE = re.compile(r"^(.*?)\s+en[_-][A-Z]{2}\s+#")
 
 
@@ -58,16 +54,26 @@ def installed_english_voices():
 
 
 def build_pool():
-    """Best available voices, best first: default, Premium, Kokoro, Enhanced, basics.
+    """Best available voices, best first: default, Kokoro, Premium.
 
-    Kokoro outranks Enhanced per Ashley's listening test (Allison Enhanced: "too robotic").
+    Per Ashley's 2026-06 full-pool listening test: all eight Kokoro voices
+    approved (above Premium), Premiums all kept, and the Enhanced and
+    basic/compact tiers dropped entirely ("robotic").
+
+    A pool.json (written by the Squawk settings app) overrides the computed
+    pool; entries no longer available on this machine are dropped.
     """
     voices = installed_english_voices()
+    if POOL_FILE.exists():
+        kokoro_ok = KOKORO_MODEL.exists() and KOKORO_VOICES_BIN.exists()
+        chosen = json.loads(POOL_FILE.read_text())
+        return [v for v in chosen
+                if v == DEFAULT_VOICE
+                or (v.startswith("kokoro:") and kokoro_ok and v in KOKORO_VOICES)
+                or v in voices]
     premium = sorted(v for v in voices if "(Premium)" in v)
-    enhanced = sorted(v for v in voices if "(Enhanced)" in v)
     kokoro = KOKORO_VOICES if KOKORO_MODEL.exists() and KOKORO_VOICES_BIN.exists() else []
-    basics = [v for v in CURATED_BASIC if v in voices]
-    return [DEFAULT_VOICE] + premium + kokoro + enhanced + basics
+    return [DEFAULT_VOICE] + kokoro + premium
 
 
 KOKORO_SOCKET = HERE / ".kokoro.sock"
