@@ -33,3 +33,4 @@ echo
 echo "Done. Start a conversation:   ./voice --user YourName"
 echo "Let an agent speak:           ./speak --as my-agent --announce \"Build finished.\""
 echo "Fix a pronunciation:          ./speak --teach \"cmux=sea mux\""
+echo "Settings app (optional):      ./app/build_app.sh && open app/Squawk.app"

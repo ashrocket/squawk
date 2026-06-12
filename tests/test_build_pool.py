@@ -49,6 +49,42 @@ class BuildPoolTest(unittest.TestCase):
                         self.pool.index("Isha (Premium)"))
 
 
+class ThinPoolFallbackTest(unittest.TestCase):
+    """Fresh Macs have no Premium/Kokoro downloads; agents still need distinct
+    voices, so a thin pool falls back to Enhanced, then decent built-in basics."""
+
+    def setUp(self):
+        self._installed = speak.installed_english_voices
+        self._model, self._bin = speak.KOKORO_MODEL, speak.KOKORO_VOICES_BIN
+        speak.KOKORO_MODEL = pathlib.Path("/nonexistent")  # no kokoro
+
+    def tearDown(self):
+        speak.installed_english_voices = self._installed
+        speak.KOKORO_MODEL, speak.KOKORO_VOICES_BIN = self._model, self._bin
+
+    def test_falls_back_to_enhanced_when_thin(self):
+        speak.installed_english_voices = lambda: [
+            "Kate (Enhanced)", "Nathan (Enhanced)", "Samantha", "Fred"]
+        pool = speak.build_pool()
+        self.assertIn("Kate (Enhanced)", pool)
+        self.assertIn("Nathan (Enhanced)", pool)
+
+    def test_falls_back_to_basics_when_nothing_downloaded(self):
+        speak.installed_english_voices = lambda: ["Samantha", "Daniel", "Fred"]
+        pool = speak.build_pool()
+        self.assertIn("Samantha", pool)
+        self.assertIn("Daniel", pool)
+        self.assertNotIn("Fred", pool)  # not in the curated fallback list
+
+    def test_rich_pool_gets_no_fallback(self):
+        speak.installed_english_voices = lambda: list(FAKE_INSTALLED)
+        existing = pathlib.Path(speak.__file__)
+        speak.KOKORO_MODEL = speak.KOKORO_VOICES_BIN = existing
+        pool = speak.build_pool()
+        self.assertNotIn("Kate (Enhanced)", pool)
+        self.assertNotIn("Samantha", pool)
+
+
 class PoolFileOverrideTest(unittest.TestCase):
     """A pool.json written by the settings app overrides the computed pool."""
 

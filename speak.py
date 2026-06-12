@@ -40,6 +40,9 @@ KOKORO_VOICES = [
 ]
 # Optional explicit pool written by the Squawk settings app; ordered, best first.
 POOL_FILE = HERE / "pool.json"
+# Decent compact voices that ship with macOS; last-resort fallback so agents
+# stay distinct on a fresh machine with nothing downloaded yet.
+FALLBACK_BASICS = ["Samantha", "Daniel", "Karen", "Moira", "Tessa", "Rishi"]
 VOICE_LINE = re.compile(r"^(.*?)\s+en[_-][A-Z]{2}\s+#")
 
 
@@ -73,7 +76,12 @@ def build_pool():
                 or v in voices]
     premium = sorted(v for v in voices if "(Premium)" in v)
     kokoro = KOKORO_VOICES if KOKORO_MODEL.exists() and KOKORO_VOICES_BIN.exists() else []
-    return [DEFAULT_VOICE] + kokoro + premium
+    pool = [DEFAULT_VOICE] + kokoro + premium
+    if len(pool) < 4:  # fresh machine: nothing downloaded; keep agents distinct
+        pool += sorted(v for v in voices if "(Enhanced)" in v)
+    if len(pool) < 4:
+        pool += [v for v in FALLBACK_BASICS if v in voices]
+    return pool
 
 
 KOKORO_SOCKET = HERE / ".kokoro.sock"

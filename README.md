@@ -1,5 +1,7 @@
 # squawk
 
+> 🌐 [squawk.raiteri.net](https://squawk.raiteri.net)
+
 **Voices for your Claude Code agents on macOS.** Talk to Claude hands-free, and
 let every agent in your [cmux](https://cmux.sh) setup speak to you — one at a
 time, each with its own voice.

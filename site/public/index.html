@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>squawk — voices for your Claude Code agents on macOS</title>
+<meta name="description" content="Talk to Claude hands-free. Every agent in your cmux setup speaks with its own voice — fully local STT/TTS, one audio channel, radio-operator rules.">
+<style>
+  :root { --bg:#14161a; --card:#1f232a; --line:#2c313a; --fg:#e8e6e3; --dim:#9aa0a6; --green:#7fb069; }
+  * { box-sizing: border-box; }
+  body { font-family:-apple-system, BlinkMacSystemFont, sans-serif; background:var(--bg); color:var(--fg);
+         margin:0; line-height:1.6; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
+  header { padding: 5rem 0 3rem; text-align: center; }
+  h1 { font-size: 3rem; margin: 0; font-weight: 700; }
+  h1 .bird { -webkit-text-fill-color: initial; }
+  h1 span.name { color: var(--green); }
+  .tagline { font-size: 1.3rem; color: var(--dim); margin: 0.8rem auto 0; max-width: 620px; }
+  .cta { margin-top: 2rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+  .btn { display:inline-block; padding: 0.65rem 1.3rem; border-radius: 8px; text-decoration: none;
+         font-weight: 600; border: 1px solid var(--line); color: var(--fg); }
+  .btn.primary { background: var(--green); color: #14161a; border-color: var(--green); }
+  .btn:hover { border-color: var(--green); }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.2rem;
+        overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .quick { margin: 1.5rem auto 0; max-width: 560px; text-align: left; }
+  h2 { margin: 3.5rem 0 1rem; font-size: 1.5rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1.1rem 1.2rem; }
+  .card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--dim); font-size: 0.92rem; }
+  .diagram { color: var(--dim); }
+  .videos { background: var(--card); border: 1px dashed var(--line); border-radius: 10px;
+            padding: 2.5rem; text-align: center; color: var(--dim); }
+  footer { margin: 4rem 0 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
+           color: var(--dim); font-size: 0.9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  footer a { color: var(--green); text-decoration: none; }
+  .local { color: var(--green); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="bird">🦜</span> <span class="name">squawk</span></h1>
+    <p class="tagline">Voices for your Claude Code agents on macOS. Talk to Claude hands-free —
+    and let every agent in your <a href="https://cmux.sh" style="color:var(--green)">cmux</a> setup
+    speak to you, one at a time, each with its own voice.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/ashrocket/squawk">View on GitHub</a>
+      <a class="btn" href="https://github.com/ashrocket/squawk#quick-start">Quick start</a>
+    </div>
+    <div class="quick">
+      <pre><code>git clone https://github.com/ashrocket/squawk &amp;&amp; cd squawk
+./setup.sh
+./voice --user YourName   # speak when greeted</code></pre>
+    </div>
+    <p><span class="local">Fully local ears and voices.</span> whisper.cpp (Metal) for speech-to-text,
+    macOS neural voices or Kokoro for text-to-speech, the Claude Code CLI as the brain.
+    No API key. Nothing leaves your Mac except what you already send to Claude.</p>
+  </header>
+
+  <h2>Radio-operator rules for a crew of agents</h2>
+  <div class="grid">
+    <div class="card"><h3>🎙️ Focus follows mic</h3>
+      <p>Run <code>voice</code> in every cmux tab. Only the focused window's agent listens; the rest stand by quietly.</p></div>
+    <div class="card"><h3>📻 Conversations hold the con</h3>
+      <p>An active exchange keeps the mic for 75s past the last turn — nobody steals the channel mid-thought.</p></div>
+    <div class="card"><h3>🗣️ One talker</h3>
+      <p>A global speech lock. Agents queue; they never talk over each other.</p></div>
+    <div class="card"><h3>🎭 Distinct voices</h3>
+      <p>Every agent auto-gets its own voice, best available first: system default, Kokoro neural, Apple Premium.</p></div>
+    <div class="card"><h3>📨 Relay requests</h3>
+      <p>Background agents queue messages the active conversation reads aloud between turns.</p></div>
+    <div class="card"><h3>🔤 Agents learn pronunciation</h3>
+      <p>Say "pronounce cmux as sea mux" once — every agent and every voice learns it, in speech and hearing.</p></div>
+    <div class="card"><h3>⚡ Barge-in</h3>
+      <p>Start talking over the assistant and it stops to listen (experimental).</p></div>
+    <div class="card"><h3>🖥️ Squawk.app</h3>
+      <p>A native settings panel: one-click install checks, voice auditions and pool curation, lexicon editing.</p></div>
+  </div>
+
+  <h2>How it works</h2>
+  <pre class="diagram"><code>mic ──▶ voice detection ──▶ whisper.cpp (Metal) ──▶ claude -p --resume
+                                                          │
+speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀───┘</code></pre>
+
+  <h2>See it work</h2>
+  <!-- VIDEOS: drop <video> or YouTube <iframe> embeds here -->
+  <div class="videos">Demo videos coming very soon — built in public, moving fast.<br>
+    Watch the <a href="https://github.com/ashrocket/squawk" style="color:var(--green)">repo</a> in the meantime.</div>
+
+  <footer>
+    <div>MIT © Ashley Raiteri · built in public</div>
+    <div><a href="https://github.com/ashrocket/squawk">github.com/ashrocket/squawk</a></div>
+  </footer>
+</div>
+</body>
+</html>
