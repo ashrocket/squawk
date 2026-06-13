@@ -52,7 +52,8 @@ struct InstallView: View {
             }
             .frame(maxHeight: .infinity)
             HStack {
-                Button("Re-check") { model.refreshChecks() }
+                Button("Refresh Status") { model.refreshChecks() }
+                    .help("Re-run the install checks, e.g. after installing something yourself")
                 Spacer()
             }
         }
