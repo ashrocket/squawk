@@ -6,45 +6,455 @@
 <title>squawk — voices for your Claude Code agents on macOS</title>
 <meta name="description" content="Talk to Claude hands-free. Every agent in your cmux setup speaks with its own voice — fully local STT/TTS, one audio channel, radio-operator rules.">
 <style>
-  :root { --bg:#14161a; --card:#1f232a; --line:#2c313a; --fg:#e8e6e3; --dim:#9aa0a6; --green:#7fb069; }
-  * { box-sizing: border-box; }
-  body { font-family:-apple-system, BlinkMacSystemFont, sans-serif; background:var(--bg); color:var(--fg);
-         margin:0; line-height:1.6; }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
-  header { padding: 5rem 0 3rem; text-align: center; }
-  h1 { font-size: 3rem; margin: 0; font-weight: 700; }
-  h1 .bird { -webkit-text-fill-color: initial; }
-  h1 span.name { color: var(--green); }
-  .tagline { font-size: 1.3rem; color: var(--dim); margin: 0.8rem auto 0; max-width: 620px; }
-  .cta { margin-top: 2rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
-  .btn { display:inline-block; padding: 0.65rem 1.3rem; border-radius: 8px; text-decoration: none;
-         font-weight: 600; border: 1px solid var(--line); color: var(--fg); }
-  .btn.primary { background: var(--green); color: #14161a; border-color: var(--green); }
-  .btn:hover { border-color: var(--green); }
-  pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.2rem;
-        overflow-x: auto; font-size: 0.9rem; }
-  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .quick { margin: 1.5rem auto 0; max-width: 560px; text-align: left; }
-  h2 { margin: 3.5rem 0 1rem; font-size: 1.5rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1.1rem 1.2rem; }
-  .card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
-  .card p { margin: 0; color: var(--dim); font-size: 0.92rem; }
-  .diagram { color: var(--dim); }
-  .videos { background: var(--card); border: 1px dashed var(--line); border-radius: 10px;
-            padding: 2.5rem; text-align: center; color: var(--dim); }
-  footer { margin: 4rem 0 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
-           color: var(--dim); font-size: 0.9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
-  footer a { color: var(--green); text-decoration: none; }
-  .local { color: var(--green); font-weight: 600; }
+  :root {
+    --ink: #18223b;
+    --muted: #4d5d77;
+    --paper: #fff7c8;
+    --paper-soft: #fffdf2;
+    --blue: #0069d9;
+    --blue-dark: #003d9e;
+    --cyan: #1dd7ff;
+    --green: #31bf45;
+    --lime: #baf62d;
+    --orange: #ff8a00;
+    --pink: #ff2ebd;
+    --red: #ff3748;
+    --purple: #7b39ff;
+    --line: rgba(24, 34, 59, 0.22);
+    --shadow: rgba(4, 20, 54, 0.24);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100%;
+    font-family: "Trebuchet MS", Verdana, Arial, sans-serif;
+    line-height: 1.58;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 18% 8%, rgba(255, 244, 57, 0.45) 0, rgba(255, 244, 57, 0) 18rem),
+      radial-gradient(circle at 85% 12%, rgba(255, 46, 189, 0.25) 0, rgba(255, 46, 189, 0) 17rem),
+      linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0)),
+      repeating-linear-gradient(135deg, #33c8ff 0, #33c8ff 12px, #1cabef 12px, #1cabef 24px);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 28%, rgba(255,255,255,0.18) 72%, rgba(255,255,255,0)),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.07) 0, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 4px);
+  }
+
+  a {
+    color: #005fc4;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 95, 196, 0.3);
+  }
+
+  a:hover {
+    color: #d0008b;
+    border-bottom-color: rgba(208, 0, 139, 0.45);
+  }
+
+  .wrap {
+    width: min(960px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 0 0 2rem;
+    position: relative;
+  }
+
+  header {
+    position: relative;
+    margin: 2rem 0 1.5rem;
+    padding: 2rem 2rem 1.7rem;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.94) 0, rgba(255,255,255,0.74) 44%, rgba(255,248,190,0.9) 45%, rgba(255,238,116,0.92) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 2px 0 rgba(0,0,0,0.08),
+      0 20px 42px rgba(0, 56, 136, 0.28);
+    overflow: hidden;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 44%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.12));
+    pointer-events: none;
+  }
+
+  header > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    margin: 0;
+    padding: 0.25rem 0 1rem;
+    line-height: 0.96;
+    font-size: 4.45rem;
+    font-weight: 900;
+    color: var(--blue);
+    text-transform: lowercase;
+    text-shadow:
+      0 2px 0 #ffffff,
+      0 4px 0 rgba(0, 62, 148, 0.18),
+      0 9px 18px rgba(0, 35, 96, 0.25);
+  }
+
+  h1 .bird {
+    display: inline-block;
+    margin-right: 0.15rem;
+    -webkit-text-fill-color: initial;
+    filter: drop-shadow(0 3px 0 rgba(0,0,0,0.16));
+    vertical-align: -0.08em;
+  }
+
+  h1 span.name {
+    position: relative;
+    display: inline-block;
+    background: linear-gradient(180deg, #ffffff 0, #e5fffb 13%, #42e6ff 29%, #0572ee 49%, #003ea4 50%, #1b83ff 83%, #b9f6ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px rgba(0, 45, 125, 0.26);
+    -webkit-box-reflect: below -0.17em linear-gradient(transparent 0, rgba(0, 72, 184, 0.24) 48%, rgba(0, 72, 184, 0));
+  }
+
+  .tagline {
+    max-width: 680px;
+    margin: 0.95rem auto 0;
+    color: #253753;
+    font-size: 1.24rem;
+    font-weight: 700;
+  }
+
+  .free-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 8rem;
+    height: 8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: #fff;
+    text-align: center;
+    font-size: 0.82rem;
+    line-height: 0.95;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(148, 0, 0, 0.36);
+    background:
+      radial-gradient(circle at 35% 24%, rgba(255,255,255,0.92) 0, rgba(255,255,255,0.36) 14%, rgba(255,255,255,0) 28%),
+      linear-gradient(180deg, #ffef4f 0, #ff9a00 38%, #ff3748 72%, #c10083 100%);
+    border: 2px solid #fff;
+    clip-path: polygon(50% 0%, 59% 21%, 78% 10%, 77% 33%, 100% 32%, 84% 50%, 100% 68%, 77% 67%, 78% 90%, 59% 79%, 50% 100%, 41% 79%, 22% 90%, 23% 67%, 0% 68%, 16% 50%, 0% 32%, 23% 33%, 22% 10%, 41% 21%);
+    box-shadow: 0 5px 0 rgba(106, 0, 88, 0.3), 0 14px 24px rgba(255, 46, 189, 0.32);
+    transform: rotate(10deg);
+    z-index: 2;
+  }
+
+  .free-badge span {
+    display: block;
+    max-width: 4.9rem;
+  }
+
+  .cta {
+    margin-top: 1.7rem;
+    display: flex;
+    gap: 0.85rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    position: relative;
+    display: inline-flex;
+    min-height: 2.85rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 1.35rem 0.7rem;
+    border: 1px solid rgba(0, 47, 113, 0.46);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.02rem;
+    font-weight: 900;
+    text-decoration: none;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.35);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.76), rgba(255,255,255,0.12) 45%, rgba(0,0,0,0) 46%),
+      linear-gradient(180deg, #3de6ff 0, #0579ff 50%, #004ec3 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 2px 0 rgba(0, 42, 105, 0.38),
+      0 8px 18px rgba(0, 84, 184, 0.24);
+  }
+
+  .btn:hover {
+    color: #fff;
+    border-color: rgba(122, 0, 98, 0.44);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.18) 45%, rgba(0,0,0,0) 46%),
+      linear-gradient(180deg, #ff8ee3 0, var(--pink) 52%, #b50083 100%);
+  }
+
+  .btn.primary {
+    border-color: rgba(19, 92, 0, 0.44);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.16) 45%, rgba(0,0,0,0) 46%),
+      linear-gradient(180deg, var(--lime) 0, var(--green) 52%, #138d22 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.92) inset,
+      0 2px 0 rgba(14, 92, 24, 0.38),
+      0 8px 18px rgba(24, 150, 39, 0.24);
+  }
+
+  .quick {
+    max-width: 620px;
+    margin: 1.45rem auto 0;
+    text-align: left;
+  }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    color: #f7fcff;
+    font-size: 0.9rem;
+    line-height: 1.48;
+    border: 1px solid rgba(0, 24, 66, 0.62);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 44%),
+      linear-gradient(180deg, #23355c 0, #111c38 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.18) inset,
+      0 6px 14px rgba(0, 20, 56, 0.25);
+  }
+
+  code {
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  }
+
+  .local-note {
+    max-width: 790px;
+    margin: 1.15rem auto 0;
+    padding: 0.75rem 0.95rem;
+    color: #273a55;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.78);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.38)),
+      rgba(255,255,255,0.34);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.86) inset;
+  }
+
+  .local {
+    color: #07851a;
+    font-weight: 900;
+  }
+
+  section {
+    margin-top: 1.5rem;
+  }
+
+  h2 {
+    margin: 2.25rem 0 1rem;
+    padding: 0.58rem 0.85rem 0.63rem;
+    color: #fff;
+    font-size: 1.58rem;
+    line-height: 1.12;
+    font-weight: 900;
+    border: 1px solid rgba(107, 0, 122, 0.38);
+    border-radius: 8px;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.38);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.1) 45%, rgba(0,0,0,0) 46%),
+      linear-gradient(90deg, #7b39ff 0, #ff2ebd 52%, #ff8a00 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.72) inset,
+      0 3px 0 rgba(52, 0, 86, 0.18),
+      0 12px 24px rgba(40, 0, 90, 0.17);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 1rem 1rem 1.08rem;
+    border: 1px solid rgba(255,255,255,0.82);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.94) 0, rgba(255,255,255,0.72) 36%, rgba(255,255,255,0.48) 37%, rgba(255,255,255,0.84) 100%),
+      var(--paper-soft);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 2px 0 rgba(0,0,0,0.08),
+      0 14px 22px rgba(0, 49, 117, 0.15);
+  }
+
+  .card:nth-child(3n + 1) {
+    border-color: rgba(31, 183, 244, 0.5);
+  }
+
+  .card:nth-child(3n + 2) {
+    border-color: rgba(255, 138, 0, 0.5);
+  }
+
+  .card:nth-child(3n + 3) {
+    border-color: rgba(49, 191, 69, 0.5);
+  }
+
+  .card h3 {
+    margin: 0 0 0.45rem;
+    color: #111f38;
+    font-size: 1.1rem;
+    line-height: 1.18;
+    font-weight: 900;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .diagram {
+    color: #d8f6ff;
+    border-color: rgba(255, 46, 189, 0.45);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0) 43%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 8px, transparent 8px, transparent 16px),
+      linear-gradient(180deg, #2c145c 0, #101a35 100%);
+  }
+
+  .videos {
+    padding: 2rem 1.5rem;
+    color: #283953;
+    text-align: center;
+    font-weight: 800;
+    border: 2px dashed rgba(255, 46, 189, 0.56);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.48)),
+      repeating-linear-gradient(-45deg, rgba(255, 239, 79, 0.42) 0, rgba(255, 239, 79, 0.42) 12px, rgba(255,255,255,0.28) 12px, rgba(255,255,255,0.28) 24px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 13px 22px rgba(0, 44, 111, 0.14);
+  }
+
+  footer {
+    margin: 2.6rem 0 0;
+    padding: 1rem 0.2rem 0;
+    color: rgba(18, 31, 56, 0.84);
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    border-top: 1px solid rgba(255,255,255,0.75);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.55);
+  }
+
+  @media (max-width: 940px) {
+    .free-badge {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin: 0 auto 0.75rem;
+      transform: rotate(7deg);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .wrap {
+      width: min(100% - 1rem, 960px);
+    }
+
+    header {
+      margin-top: 0.5rem;
+      padding: 1.45rem 1rem 1.35rem;
+    }
+
+    h1 {
+      font-size: 3.25rem;
+      padding-bottom: 0.7rem;
+    }
+
+    .tagline {
+      font-size: 1.05rem;
+    }
+
+    pre {
+      padding: 0.85rem 0.9rem;
+      font-size: 0.78rem;
+    }
+
+    .quick pre code {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .diagram {
+      font-size: 0.62rem;
+    }
+
+    .free-badge {
+      width: 6.9rem;
+      height: 6.9rem;
+      font-size: 0.72rem;
+    }
+
+    .free-badge span {
+      max-width: 4.25rem;
+    }
+
+    .btn {
+      width: 100%;
+    }
+
+    h2 {
+      font-size: 1.32rem;
+    }
+
+    .videos {
+      padding: 1.45rem 1rem;
+    }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1><span class="bird">🦜</span> <span class="name">squawk</span></h1>
+    <div class="free-badge"><span>FREE &amp; OPEN SOURCE!</span></div>
+    <h1><span class="bird">🦜</span> <span class="name" data-text="squawk">squawk</span></h1>
     <p class="tagline">Voices for your Claude Code agents on macOS. Talk to Claude hands-free —
-    and let every agent in your <a href="https://cmux.sh" style="color:var(--green)">cmux</a> setup
+    and let every agent in your <a href="https://cmux.sh">cmux</a> setup
     speak to you, one at a time, each with its own voice.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/ashrocket/squawk">View on GitHub</a>
@@ -55,40 +465,47 @@
 ./setup.sh
 ./voice --user YourName   # speak when greeted</code></pre>
     </div>
-    <p><span class="local">Fully local ears and voices.</span> whisper.cpp (Metal) for speech-to-text,
+    <p class="local-note"><span class="local">Fully local ears and voices.</span> whisper.cpp (Metal) for speech-to-text,
     macOS neural voices or Kokoro for text-to-speech, the Claude Code CLI as the brain.
     No API key. Nothing leaves your Mac except what you already send to Claude.</p>
   </header>
 
-  <h2>Radio-operator rules for a crew of agents</h2>
-  <div class="grid">
-    <div class="card"><h3>🎙️ Focus follows mic</h3>
-      <p>Run <code>voice</code> in every cmux tab. Only the focused window's agent listens; the rest stand by quietly.</p></div>
-    <div class="card"><h3>📻 Conversations hold the con</h3>
-      <p>An active exchange keeps the mic for 75s past the last turn — nobody steals the channel mid-thought.</p></div>
-    <div class="card"><h3>🗣️ One talker</h3>
-      <p>A global speech lock. Agents queue; they never talk over each other.</p></div>
-    <div class="card"><h3>🎭 Distinct voices</h3>
-      <p>Every agent auto-gets its own voice, best available first: system default, Kokoro neural, Apple Premium.</p></div>
-    <div class="card"><h3>📨 Relay requests</h3>
-      <p>Background agents queue messages the active conversation reads aloud between turns.</p></div>
-    <div class="card"><h3>🔤 Agents learn pronunciation</h3>
-      <p>Say "pronounce cmux as sea mux" once — every agent and every voice learns it, in speech and hearing.</p></div>
-    <div class="card"><h3>⚡ Barge-in</h3>
-      <p>Start talking over the assistant and it stops to listen (experimental).</p></div>
-    <div class="card"><h3>🖥️ Squawk.app</h3>
-      <p>A native settings panel: one-click install checks, voice auditions and pool curation, lexicon editing.</p></div>
-  </div>
+  <section>
+    <h2>Radio-operator rules for a crew of agents</h2>
+    <div class="grid">
+      <div class="card"><h3>🎙️ Focus follows mic</h3>
+        <p>Run <code>voice</code> in every cmux tab. Only the focused window's agent listens; the rest stand by quietly.</p></div>
+      <div class="card"><h3>📻 Conversations hold the con</h3>
+        <p>An active exchange keeps the mic for 75s past the last turn — nobody steals the channel mid-thought.</p></div>
+      <div class="card"><h3>🗣️ One talker</h3>
+        <p>A global speech lock. Agents queue; they never talk over each other.</p></div>
+      <div class="card"><h3>🎭 Distinct voices</h3>
+        <p>Every agent auto-gets its own voice, best available first: system default, Kokoro neural, Apple Premium.</p></div>
+      <div class="card"><h3>📨 Relay requests</h3>
+        <p>Background agents queue messages the active conversation reads aloud between turns.</p></div>
+      <div class="card"><h3>🔤 Agents learn pronunciation</h3>
+        <p>Say "pronounce cmux as sea mux" once — every agent and every voice learns it, in speech and hearing.</p></div>
+      <div class="card"><h3>⚡ Barge-in</h3>
+        <p>Start talking over the assistant and it stops to listen (experimental).</p></div>
+      <div class="card"><h3>🖥️ Squawk.app</h3>
+        <p>A native settings panel: one-click install checks, voice auditions and pool curation, lexicon editing.</p></div>
+    </div>
+  </section>
 
-  <h2>How it works</h2>
-  <pre class="diagram"><code>mic ──▶ voice detection ──▶ whisper.cpp (Metal) ──▶ claude -p --resume
+  <section>
+    <h2>How it works</h2>
+    <pre class="diagram"><code>mic ──▶ voice detection ──▶ whisper.cpp (Metal) ──▶ claude -p --resume
                                                           │
 speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀───┘</code></pre>
+  </section>
 
-  <h2>See it work</h2>
-  <!-- VIDEOS: drop <video> or YouTube <iframe> embeds here -->
-  <div class="videos">Demo videos coming very soon — built in public, moving fast.<br>
-    Watch the <a href="https://github.com/ashrocket/squawk" style="color:var(--green)">repo</a> in the meantime.</div>
+  <section>
+    <h2>See it work</h2>
+    <!-- VIDEOS -->
+    <!-- VIDEOS: drop <video> or YouTube <iframe> embeds here -->
+    <div class="videos">Demo videos coming very soon — built in public, moving fast.<br>
+      Watch the <a href="https://github.com/ashrocket/squawk">repo</a> in the meantime.</div>
+  </section>
 
   <footer>
     <div>MIT © Ashley Raiteri · built in public</div>
