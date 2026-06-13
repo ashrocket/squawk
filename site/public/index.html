@@ -7,21 +7,21 @@
 <meta name="description" content="Talk to Claude hands-free. Every agent in your cmux setup speaks with its own voice — fully local STT/TTS, one audio channel, radio-operator rules.">
 <style>
   :root {
-    --ink: #18223b;
-    --muted: #4d5d77;
-    --paper: #fff7c8;
-    --paper-soft: #fffdf2;
-    --blue: #0069d9;
-    --blue-dark: #003d9e;
-    --cyan: #1dd7ff;
-    --green: #31bf45;
-    --lime: #baf62d;
-    --orange: #ff8a00;
-    --pink: #ff2ebd;
-    --red: #ff3748;
-    --purple: #7b39ff;
-    --line: rgba(24, 34, 59, 0.22);
-    --shadow: rgba(4, 20, 54, 0.24);
+    --ink: #21382c;
+    --muted: #5b7263;
+    --paper: #eef8ef;
+    --paper-soft: #f8fcf8;
+    --blue: #0b8a6d;
+    --blue-dark: #04604b;
+    --cyan: #56d4b2;
+    --green: #43a047;
+    --lime: #8dc63f;
+    --orange: #f7941d;
+    --pink: #0b8a6d;
+    --red: #3e9c54;
+    --purple: #2e7d5b;
+    --line: rgba(33, 56, 44, 0.22);
+    --shadow: rgba(10, 51, 35, 0.22);
   }
 
   * {
@@ -35,14 +35,14 @@
   body {
     margin: 0;
     min-height: 100%;
-    font-family: "Trebuchet MS", Verdana, Arial, sans-serif;
+    font-family: "Lucida Grande", "Helvetica Neue", Helvetica, Verdana, sans-serif;
     line-height: 1.58;
     color: var(--ink);
     background:
-      radial-gradient(circle at 18% 8%, rgba(255, 244, 57, 0.45) 0, rgba(255, 244, 57, 0) 18rem),
-      radial-gradient(circle at 85% 12%, rgba(255, 46, 189, 0.25) 0, rgba(255, 46, 189, 0) 17rem),
-      linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0)),
-      repeating-linear-gradient(135deg, #33c8ff 0, #33c8ff 12px, #1cabef 12px, #1cabef 24px);
+      radial-gradient(circle at 18% 8%, rgba(214, 245, 196, 0.55) 0, rgba(214, 245, 196, 0) 18rem),
+      radial-gradient(circle at 85% 12%, rgba(86, 212, 178, 0.30) 0, rgba(86, 212, 178, 0) 17rem),
+      linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0)),
+      repeating-linear-gradient(135deg, #9fd9a8 0, #9fd9a8 12px, #8bcf96 12px, #8bcf96 24px);
   }
 
   body::before {
@@ -56,15 +56,15 @@
   }
 
   a {
-    color: #005fc4;
+    color: #0a7d5e;
     font-weight: 700;
     text-decoration: none;
-    border-bottom: 1px solid rgba(0, 95, 196, 0.3);
+    border-bottom: 1px solid rgba(10, 125, 94, 0.3);
   }
 
   a:hover {
-    color: #d0008b;
-    border-bottom-color: rgba(208, 0, 139, 0.45);
+    color: #f7941d;
+    border-bottom-color: rgba(247, 148, 29, 0.45);
   }
 
   .wrap {
@@ -82,11 +82,11 @@
     border: 1px solid rgba(255,255,255,0.8);
     border-radius: 8px;
     background:
-      linear-gradient(180deg, rgba(255,255,255,0.94) 0, rgba(255,255,255,0.74) 44%, rgba(255,248,190,0.9) 45%, rgba(255,238,116,0.92) 100%);
+      linear-gradient(180deg, rgba(255,255,255,0.96) 0, rgba(255,255,255,0.80) 44%, rgba(232,248,228,0.92) 45%, rgba(205,236,196,0.94) 100%);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.95) inset,
       0 2px 0 rgba(0,0,0,0.08),
-      0 20px 42px rgba(0, 56, 136, 0.28);
+      0 20px 42px rgba(16, 84, 52, 0.26);
     overflow: hidden;
   }
 
@@ -114,8 +114,8 @@
     text-transform: lowercase;
     text-shadow:
       0 2px 0 #ffffff,
-      0 4px 0 rgba(0, 62, 148, 0.18),
-      0 9px 18px rgba(0, 35, 96, 0.25);
+      0 4px 0 rgba(11, 96, 64, 0.18),
+      0 9px 18px rgba(6, 64, 42, 0.25);
   }
 
   h1 .bird {
@@ -129,19 +129,19 @@
   h1 span.name {
     position: relative;
     display: inline-block;
-    background: linear-gradient(180deg, #ffffff 0, #e5fffb 13%, #42e6ff 29%, #0572ee 49%, #003ea4 50%, #1b83ff 83%, #b9f6ff 100%);
+    background: linear-gradient(180deg, #ffffff 0, #eafff3 13%, #9fe860 29%, #2e9e4f 49%, #0a6b46 50%, #2fae74 83%, #c8f7d6 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1px rgba(0, 45, 125, 0.26);
-    -webkit-box-reflect: below -0.17em linear-gradient(transparent 0, rgba(0, 72, 184, 0.24) 48%, rgba(0, 72, 184, 0));
+    -webkit-text-stroke: 1px rgba(8, 77, 50, 0.28);
+    -webkit-box-reflect: below -0.17em linear-gradient(transparent 0, rgba(12, 110, 72, 0.24) 48%, rgba(12, 110, 72, 0));
   }
 
   .tagline {
     max-width: 680px;
     margin: 0.95rem auto 0;
-    color: #253753;
+    color: #2c4636;
     font-size: 1.24rem;
     font-weight: 700;
   }
@@ -162,13 +162,13 @@
     line-height: 0.95;
     font-weight: 900;
     text-transform: uppercase;
-    text-shadow: 0 2px 0 rgba(148, 0, 0, 0.36);
+    text-shadow: 0 2px 0 rgba(60, 96, 0, 0.36);
     background:
       radial-gradient(circle at 35% 24%, rgba(255,255,255,0.92) 0, rgba(255,255,255,0.36) 14%, rgba(255,255,255,0) 28%),
-      linear-gradient(180deg, #ffef4f 0, #ff9a00 38%, #ff3748 72%, #c10083 100%);
+      linear-gradient(180deg, #d8f25e 0, #8dc63f 38%, #2e9e4f 72%, #0a6b46 100%);
     border: 2px solid #fff;
     clip-path: polygon(50% 0%, 59% 21%, 78% 10%, 77% 33%, 100% 32%, 84% 50%, 100% 68%, 77% 67%, 78% 90%, 59% 79%, 50% 100%, 41% 79%, 22% 90%, 23% 67%, 0% 68%, 16% 50%, 0% 32%, 23% 33%, 22% 10%, 41% 21%);
-    box-shadow: 0 5px 0 rgba(106, 0, 88, 0.3), 0 14px 24px rgba(255, 46, 189, 0.32);
+    box-shadow: 0 5px 0 rgba(8, 77, 50, 0.3), 0 14px 24px rgba(46, 158, 79, 0.32);
     transform: rotate(10deg);
     z-index: 2;
   }
@@ -193,7 +193,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.65rem 1.35rem 0.7rem;
-    border: 1px solid rgba(0, 47, 113, 0.46);
+    border: 1px solid rgba(5, 77, 58, 0.46);
     border-radius: 8px;
     color: #fff;
     font-size: 1.02rem;
@@ -202,26 +202,26 @@
     text-shadow: 0 -1px 0 rgba(0,0,0,0.35);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.76), rgba(255,255,255,0.12) 45%, rgba(0,0,0,0) 46%),
-      linear-gradient(180deg, #3de6ff 0, #0579ff 50%, #004ec3 100%);
+      linear-gradient(180deg, #54d8b4 0, #0b8a6d 50%, #04604b 100%);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.9) inset,
-      0 2px 0 rgba(0, 42, 105, 0.38),
-      0 8px 18px rgba(0, 84, 184, 0.24);
+      0 2px 0 rgba(4, 70, 53, 0.38),
+      0 8px 18px rgba(11, 138, 109, 0.24);
   }
 
   .btn:hover {
     color: #fff;
-    border-color: rgba(122, 0, 98, 0.44);
+    border-color: rgba(160, 92, 0, 0.44);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.18) 45%, rgba(0,0,0,0) 46%),
-      linear-gradient(180deg, #ff8ee3 0, var(--pink) 52%, #b50083 100%);
+      linear-gradient(180deg, #ffc46e 0, var(--orange) 52%, #c96a00 100%);
   }
 
   .btn.primary {
     border-color: rgba(19, 92, 0, 0.44);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.16) 45%, rgba(0,0,0,0) 46%),
-      linear-gradient(180deg, var(--lime) 0, var(--green) 52%, #138d22 100%);
+      linear-gradient(180deg, var(--lime) 0, #4d9e3f 52%, #2c7a2e 100%);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.92) inset,
       0 2px 0 rgba(14, 92, 24, 0.38),
@@ -241,14 +241,14 @@
     color: #f7fcff;
     font-size: 0.9rem;
     line-height: 1.48;
-    border: 1px solid rgba(0, 24, 66, 0.62);
+    border: 1px solid rgba(6, 46, 32, 0.62);
     border-radius: 8px;
     background:
       linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 44%),
-      linear-gradient(180deg, #23355c 0, #111c38 100%);
+      linear-gradient(180deg, #29503c 0, #122a1d 100%);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.18) inset,
-      0 6px 14px rgba(0, 20, 56, 0.25);
+      0 6px 14px rgba(5, 38, 24, 0.25);
   }
 
   code {
@@ -259,7 +259,7 @@
     max-width: 790px;
     margin: 1.15rem auto 0;
     padding: 0.75rem 0.95rem;
-    color: #273a55;
+    color: #2c4636;
     font-size: 1rem;
     font-weight: 700;
     border: 1px solid rgba(255,255,255,0.78);
@@ -286,16 +286,16 @@
     font-size: 1.58rem;
     line-height: 1.12;
     font-weight: 900;
-    border: 1px solid rgba(107, 0, 122, 0.38);
+    border: 1px solid rgba(8, 77, 50, 0.38);
     border-radius: 8px;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.38);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.1) 45%, rgba(0,0,0,0) 46%),
-      linear-gradient(90deg, #7b39ff 0, #ff2ebd 52%, #ff8a00 100%);
+      linear-gradient(90deg, #8dc63f 0, #2e9e4f 52%, #0b8a6d 100%);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.72) inset,
-      0 3px 0 rgba(52, 0, 86, 0.18),
-      0 12px 24px rgba(40, 0, 90, 0.17);
+      0 3px 0 rgba(8, 60, 38, 0.18),
+      0 12px 24px rgba(8, 60, 38, 0.17);
   }
 
   .grid {
@@ -318,20 +318,20 @@
   }
 
   .card:nth-child(3n + 1) {
-    border-color: rgba(31, 183, 244, 0.5);
+    border-color: rgba(141, 198, 63, 0.55);
   }
 
   .card:nth-child(3n + 2) {
-    border-color: rgba(255, 138, 0, 0.5);
+    border-color: rgba(11, 138, 109, 0.5);
   }
 
   .card:nth-child(3n + 3) {
-    border-color: rgba(49, 191, 69, 0.5);
+    border-color: rgba(247, 148, 29, 0.5);
   }
 
   .card h3 {
     margin: 0 0 0.45rem;
-    color: #111f38;
+    color: #1b3526;
     font-size: 1.1rem;
     line-height: 1.18;
     font-weight: 900;
@@ -344,33 +344,33 @@
   }
 
   .diagram {
-    color: #d8f6ff;
-    border-color: rgba(255, 46, 189, 0.45);
+    color: #ddf7e7;
+    border-color: rgba(141, 198, 63, 0.5);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0) 43%),
       repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 8px, transparent 8px, transparent 16px),
-      linear-gradient(180deg, #2c145c 0, #101a35 100%);
+      linear-gradient(180deg, #1d4a31 0, #0e2418 100%);
   }
 
   .videos {
     padding: 2rem 1.5rem;
-    color: #283953;
+    color: #2c4636;
     text-align: center;
     font-weight: 800;
-    border: 2px dashed rgba(255, 46, 189, 0.56);
+    border: 2px dashed rgba(46, 158, 79, 0.56);
     border-radius: 8px;
     background:
       linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.48)),
-      repeating-linear-gradient(-45deg, rgba(255, 239, 79, 0.42) 0, rgba(255, 239, 79, 0.42) 12px, rgba(255,255,255,0.28) 12px, rgba(255,255,255,0.28) 24px);
+      repeating-linear-gradient(-45deg, rgba(186, 232, 158, 0.42) 0, rgba(186, 232, 158, 0.42) 12px, rgba(255,255,255,0.28) 12px, rgba(255,255,255,0.28) 24px);
     box-shadow:
       0 1px 0 rgba(255,255,255,0.9) inset,
-      0 13px 22px rgba(0, 44, 111, 0.14);
+      0 13px 22px rgba(11, 70, 44, 0.14);
   }
 
   footer {
     margin: 2.6rem 0 0;
     padding: 1rem 0.2rem 0;
-    color: rgba(18, 31, 56, 0.84);
+    color: rgba(27, 53, 38, 0.84);
     font-size: 0.9rem;
     font-weight: 700;
     display: flex;
