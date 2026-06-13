@@ -15,246 +15,335 @@
 <meta name="twitter:image" content="https://squawk.raiteri.net/icon.png">
 <style>
   :root {
-    --navy: #1f2d3d;
-    --slate: #51596c;
+    --navy: #1c2b3a;
+    --slate: #637282;
     --blue: #1f8ded;
-    --blue-deep: #266ee8;
-    --indigo: #6c5ce7;
+    --blue-dark: #1668c8;
     --green: #2ecc71;
-    --bg: #fafbfd;
-    --line: #e3e8ee;
+    --bg: #ffffff;
+    --bg-soft: #f5f8ff;
+    --line: #e3e8ef;
+    --nav-h: 60px;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    margin: 0;
+    padding-top: var(--nav-h);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     color: var(--navy);
     background: var(--bg);
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
   }
-  a { color: var(--blue-deep); text-decoration: none; }
+  a { color: var(--blue); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 0 1.5rem; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 1.75rem; }
 
-  /* ---- hero ---- */
+  /* ---- NAV ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.75rem;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--navy); text-decoration: none !important;
+    display: flex; align-items: center; gap: 0.4rem;
+    letter-spacing: -0.01em;
+  }
+  .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-links a {
+    font-size: 0.9rem; font-weight: 500;
+    color: var(--slate); text-decoration: none;
+  }
+  .nav-links a:hover { color: var(--navy); }
+  .nav-cta {
+    display: inline-flex; align-items: center;
+    padding: 0.45rem 1.15rem; border-radius: 100px;
+    font-size: 0.88rem; font-weight: 600;
+    background: var(--blue); color: #fff;
+    text-decoration: none !important;
+    transition: background .12s;
+  }
+  .nav-cta:hover { background: var(--blue-dark); }
+
+  /* ---- HERO ---- */
   header {
-    position: relative;
     text-align: center;
-    padding: 4.5rem 1.5rem 5rem;
-    color: #fff;
-    background:
-      radial-gradient(1100px 420px at 15% -8%, rgba(255,255,255,0.16) 0, rgba(255,255,255,0) 60%),
-      radial-gradient(900px 380px at 88% 0%, rgba(108, 92, 231, 0.55) 0, rgba(108, 92, 231, 0) 62%),
-      linear-gradient(128deg, #2a9bf5 0%, #2680ee 44%, #5f6ee8 100%);
+    padding: 6.5rem 1.75rem 5rem;
+    background: var(--bg);
   }
-  header a { color: #fff; font-weight: 600; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.5); }
-  .free-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    margin-bottom: 1.4rem;
-    padding: 0.32rem 0.95rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.45);
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.77rem; font-weight: 700;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--slate);
+    border: 1px solid var(--line);
     border-radius: 100px;
-    background: rgba(255,255,255,0.14);
+    background: var(--bg-soft);
   }
-  .free-badge::before {
+  .badge::before {
     content: "";
-    width: 0.55rem; height: 0.55rem;
-    border-radius: 50%;
+    width: 0.48rem; height: 0.48rem; border-radius: 50%;
     background: var(--green);
-    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.35);
+    box-shadow: 0 0 0 3px rgba(46,204,113,0.22);
   }
   h1 {
-    margin: 0;
-    font-size: 3.6rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    font-size: 4rem; font-weight: 700;
+    letter-spacing: -0.035em; line-height: 1.05;
+    color: var(--navy);
   }
-  h1 .bird { vertical-align: -0.06em; margin-right: 0.1rem; }
+  h1 .bird { vertical-align: -0.05em; margin-right: 0.1rem; }
   .tagline {
-    max-width: 640px;
-    margin: 1.1rem auto 0;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: rgba(255,255,255,0.92);
+    max-width: 580px; margin: 1.3rem auto 0;
+    font-size: 1.2rem; font-weight: 400;
+    color: var(--slate);
   }
-  .cta { margin-top: 2rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.78rem 1.75rem;
-    border-radius: 100px;
-    font-size: 1.02rem;
-    font-weight: 600;
-    text-decoration: none !important;
-    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  .tagline a { font-weight: 500; }
+  .cta { margin-top: 2.2rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.85rem 2.1rem; border-radius: 100px;
+    font-size: 1rem; font-weight: 600; text-decoration: none !important;
+    background: var(--blue); color: #fff;
+    box-shadow: 0 2px 14px rgba(31,141,237,0.30);
+    transition: transform .12s, box-shadow .12s, background .12s;
   }
-  .btn.primary {
-    color: var(--blue-deep);
-    background: #fff;
-    box-shadow: 0 2px 10px rgba(13, 39, 80, 0.22);
+  .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(31,141,237,0.38); }
+  .btn-outline {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.85rem 2.1rem; border-radius: 100px;
+    font-size: 1rem; font-weight: 600; text-decoration: none !important;
+    color: var(--navy); border: 1.5px solid var(--line);
+    transition: border-color .12s, background .12s;
   }
-  .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(13, 39, 80, 0.28); }
-  .btn:not(.primary) {
-    color: #fff;
-    border: 1.5px solid rgba(255,255,255,0.75);
+  .btn-outline:hover { border-color: #b0bac6; background: var(--bg-soft); }
+  .quick {
+    max-width: 580px; margin: 2.8rem auto 0; text-align: left;
   }
-  .btn:not(.primary):hover { background: rgba(255,255,255,0.12); }
-  .quick { max-width: 600px; margin: 2.2rem auto 0; text-align: left; }
   pre {
-    margin: 0;
-    padding: 1.05rem 1.25rem;
-    overflow-x: auto;
-    font-size: 0.88rem;
-    line-height: 1.55;
-    color: #dce7f5;
-    background: #15233b;
-    border-radius: 10px;
-    box-shadow: 0 10px 28px rgba(10, 30, 64, 0.30);
+    margin: 0; padding: 1.1rem 1.4rem; overflow-x: auto;
+    font-size: 0.86rem; line-height: 1.6;
+    color: #c6d8f0; background: var(--navy);
+    border-radius: 10px; box-shadow: 0 8px 32px rgba(28,43,58,0.14);
   }
   code { font-family: "SF Mono", Menlo, Consolas, monospace; }
   .local-note {
-    max-width: 720px;
-    margin: 1.6rem auto 0;
-    font-size: 0.98rem;
-    color: rgba(255,255,255,0.88);
+    max-width: 640px; margin: 2rem auto 0;
+    font-size: 0.91rem; color: var(--slate);
   }
-  .local { font-weight: 700; color: #fff; }
+  .local-note strong { color: var(--navy); font-weight: 600; }
 
-  /* ---- sections ---- */
-  section { margin-top: 4rem; }
-  h2 {
-    margin: 0 0 1.6rem;
-    text-align: center;
-    font-size: 1.9rem;
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    color: var(--navy);
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.1rem;
-  }
-  .card {
-    padding: 1.4rem 1.4rem 1.5rem;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(31, 45, 61, 0.06);
-    transition: transform .12s ease, box-shadow .12s ease;
-  }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(31, 45, 61, 0.10); }
-  .card h3 { margin: 0 0 0.5rem; font-size: 1.08rem; font-weight: 700; color: var(--navy); }
-  .card p { margin: 0; font-size: 0.95rem; color: var(--slate); }
-  .diagram {
-    color: #c6d8f0;
-    background: #15233b;
-    border-radius: 10px;
-  }
-  .videos {
-    padding: 3rem 1.5rem;
-    text-align: center;
-    color: var(--slate);
-    font-size: 1.05rem;
-    background: #fff;
-    border: 1.5px dashed #c4cfdd;
-    border-radius: 10px;
-  }
-  footer {
-    margin-top: 4.5rem;
-    padding: 1.6rem 0 2.2rem;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-    font-size: 0.9rem;
-    color: var(--slate);
+  /* ---- STRIP ---- */
+  .strip {
+    padding: 1.4rem 1.75rem;
+    background: var(--bg-soft);
     border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+    font-size: 0.97rem; color: var(--slate);
   }
 
-  @media (max-width: 700px) {
-    header { padding: 3rem 1rem 3.5rem; }
+  /* ---- SECTIONS ---- */
+  .section { padding: 5rem 0; }
+  .section-white { background: var(--bg); }
+  .section-soft { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  h2 {
+    font-size: 1.9rem; font-weight: 700;
+    letter-spacing: -0.02em; color: var(--navy);
+    text-align: center; margin-bottom: 0.6rem;
+  }
+  .section-lead {
+    text-align: center; color: var(--slate);
+    font-size: 1.02rem; margin-bottom: 3rem;
+    max-width: 520px; margin-left: auto; margin-right: auto;
+  }
+  .section-lead + * { margin-top: 3rem; }
+
+  /* ---- FEATURE GRID ---- */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .feat {
+    padding: 1.75rem 1.6rem;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .feat:nth-child(3n) { border-right: none; }
+  /* overflow:hidden clips last-row border-bottom; outer border provides the edge */
+  .feat-icon { font-size: 1.5rem; display: block; margin-bottom: 0.7rem; }
+  .feat h3 {
+    font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 0.4rem;
+  }
+  .feat p { font-size: 0.92rem; color: var(--slate); }
+
+  /* ---- DIAGRAM ---- */
+  .diagram {
+    max-width: 680px; margin: 0 auto;
+    color: #c6d8f0; background: var(--navy);
+    border-radius: 10px;
+    font-size: 0.84rem; line-height: 1.8;
+  }
+
+  /* ---- VIDEOS ---- */
+  .videos {
+    max-width: 680px; margin: 0 auto;
+    padding: 3rem 2rem;
+    text-align: center; font-size: 1rem; color: var(--slate);
+    border: 1.5px dashed var(--line); border-radius: 10px;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 1.5rem 1.75rem;
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    font-size: 0.88rem; color: var(--slate);
+  }
+  footer a { color: var(--slate); }
+  footer a:hover { color: var(--navy); }
+
+  @media (max-width: 760px) {
     h1 { font-size: 2.6rem; }
-    .tagline { font-size: 1.1rem; }
-    .btn { width: 100%; }
-    pre { font-size: 0.74rem; }
-    .diagram { font-size: 0.6rem; }
-    .quick pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .tagline { font-size: 1.05rem; }
+    .btn-primary, .btn-outline { width: 100%; }
+    pre { font-size: 0.76rem; }
+    .features { grid-template-columns: 1fr; }
+    .feat { border-right: none; }
+    .feat:nth-last-child(-n+3) { border-bottom: 1px solid var(--line); }
+    .feat:last-child { border-bottom: none; }
+    nav { padding: 0 1rem; }
+    .nav-links { gap: 1rem; }
+  }
+  @media (max-width: 520px) {
+    .nav-links a:not(.nav-cta) { display: none; }
   }
 </style>
 </head>
 <body>
+
+<nav>
+  <a class="nav-logo" href="/"><span>🦜</span> squawk</a>
+  <div class="nav-links">
+    <a href="https://github.com/ashrocket/squawk">GitHub</a>
+    <a class="nav-cta" href="https://github.com/ashrocket/squawk#quick-start">Quick start</a>
+  </div>
+</nav>
+
 <header>
-  <div class="free-badge"><span>Free &amp; open source</span></div>
+  <div class="badge">Free &amp; open source · MIT</div>
   <h1><span class="bird">🦜</span> squawk</h1>
-  <p class="tagline">Voices for your Claude Code agents on macOS. Talk to Claude hands-free —
-  and let every agent in your <a href="https://cmux.sh">cmux</a> setup
-  speak to you, one at a time, each with its own voice.</p>
+  <p class="tagline">Voices for your Claude Code agents on macOS. Talk to Claude hands-free — every agent in your <a href="https://cmux.sh">cmux</a> setup speaks with its own voice.</p>
   <div class="cta">
-    <a class="btn primary" href="https://github.com/ashrocket/squawk">View on GitHub</a>
-    <a class="btn" href="https://github.com/ashrocket/squawk#quick-start">Quick start</a>
+    <a class="btn-primary" href="https://github.com/ashrocket/squawk">View on GitHub</a>
+    <a class="btn-outline" href="https://github.com/ashrocket/squawk#quick-start">Quick start →</a>
   </div>
   <div class="quick">
     <pre><code>git clone https://github.com/ashrocket/squawk &amp;&amp; cd squawk
 ./setup.sh
 ./voice --user YourName   # speak when greeted</code></pre>
   </div>
-  <p class="local-note"><span class="local">Fully local ears and voices.</span> whisper.cpp (Metal) for speech-to-text,
-  macOS neural voices or Kokoro for text-to-speech, the Claude Code CLI as the brain.
-  No API key. Nothing leaves your Mac except what you already send to Claude.</p>
+  <p class="local-note"><strong>Fully local ears and voices.</strong> whisper.cpp (Metal) for speech-to-text, macOS neural voices or Kokoro for text-to-speech. Nothing leaves your Mac except what you already send to Claude.</p>
 </header>
-<div class="wrap">
-  <section>
-    <h2>Radio-operator rules for a crew of agents</h2>
-    <div class="grid">
-      <div class="card"><h3>🎙️ Focus follows mic</h3>
-        <p>Run <code>voice</code> in every cmux tab. Only the focused window's agent listens; the rest stand by quietly.</p></div>
-      <div class="card"><h3>📻 Conversations hold the con</h3>
-        <p>An active exchange keeps the mic for 75s past the last turn — nobody steals the channel mid-thought.</p></div>
-      <div class="card"><h3>🗣️ One talker</h3>
-        <p>A global speech lock. Agents queue; they never talk over each other.</p></div>
-      <div class="card"><h3>🎭 Distinct voices</h3>
-        <p>Every agent auto-gets its own voice, best available first: system default, Kokoro neural, Apple Premium.</p></div>
-      <div class="card"><h3>📨 Relay requests</h3>
-        <p>Background agents queue messages the active conversation reads aloud between turns.</p></div>
-      <div class="card"><h3>🔤 Agents learn pronunciation</h3>
-        <p>Say "pronounce cmux as sea mux" once — every agent and every voice learns it, in speech and hearing.</p></div>
-      <div class="card"><h3>⚡ Barge-in</h3>
-        <p>Start talking over the assistant and it stops to listen (experimental).</p></div>
-      <div class="card"><h3>🖥️ Squawk.app</h3>
-        <p>A native settings panel: one-click install checks, voice auditions and pool curation, lexicon editing.</p></div>
-    </div>
-  </section>
 
-  <section>
+<div class="strip">
+  No cloud STT, no cloud TTS, no extra API key. Runs entirely on your Mac.
+</div>
+
+<div class="section section-white">
+  <div class="wrap">
+    <h2>Radio-operator rules for a crew of agents</h2>
+    <p class="section-lead">Run <code>voice</code> in every cmux tab. The agents coordinate automatically — one channel, no chaos.</p>
+    <div class="features">
+      <div class="feat">
+        <span class="feat-icon">🎙️</span>
+        <h3>Focus follows mic</h3>
+        <p>Only the focused window's agent listens; the rest stand by quietly.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">📻</span>
+        <h3>Con-holding</h3>
+        <p>An active exchange keeps the mic for 75 s past the last turn — nobody steals the channel mid-thought.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🗣️</span>
+        <h3>One talker</h3>
+        <p>A global speech lock. Agents queue; they never talk over each other.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🎭</span>
+        <h3>Distinct voices</h3>
+        <p>Every agent auto-gets its own voice — Kokoro neural, Apple Premium, or system default, best first.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">📨</span>
+        <h3>Relay requests</h3>
+        <p>Background agents queue messages; the active conversation reads them aloud between turns.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🔤</span>
+        <h3>Pronunciation learning</h3>
+        <p>Say "pronounce cmux as sea mux" once — every agent and every voice learns it, in speech and hearing.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">⚡</span>
+        <h3>Barge-in</h3>
+        <p>Start talking over the assistant and it stops to listen. Experimental, but it works.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🖥️</span>
+        <h3>Squawk.app</h3>
+        <p>Native macOS settings panel: one-click install checks, voice auditions, pool curation, lexicon editing.</p>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🔇</span>
+        <h3>Echo suppression</h3>
+        <p>Talk while the agent is speaking and the speech lock prevents your voice from feeding back as input.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section section-soft">
+  <div class="wrap">
     <h2>How it works</h2>
+    <p class="section-lead" style="margin-bottom: 2rem;">whisper.cpp listens, Claude thinks, your chosen voice speaks. One clean pipeline.</p>
     <pre class="diagram"><code>mic ──▶ voice detection ──▶ whisper.cpp (Metal) ──▶ claude -p --resume
                                                           │
 speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀───┘</code></pre>
-  </section>
+  </div>
+</div>
 
-  <section>
+<div class="section section-white">
+  <div class="wrap">
     <h2>See it work</h2>
+    <p class="section-lead" style="margin-bottom: 2rem;">Built in public, moving fast.</p>
     <!-- VIDEOS -->
     <!-- VIDEOS: drop <video> or YouTube <iframe> embeds here -->
-    <div class="videos">Demo videos coming very soon — built in public, moving fast.<br>
-      Watch the <a href="https://github.com/ashrocket/squawk">repo</a> in the meantime.</div>
-  </section>
-
-  <footer>
-    <div>MIT © Ashley Raiteri · built in public</div>
-    <div><a href="https://github.com/ashrocket/squawk">github.com/ashrocket/squawk</a></div>
-  </footer>
+    <div class="videos">
+      Demo videos coming very soon.<br>
+      Watch the <a href="https://github.com/ashrocket/squawk">repo</a> in the meantime.
+    </div>
+  </div>
 </div>
+
+<footer>
+  <div>MIT © Ashley Raiteri · built in public</div>
+  <div><a href="https://github.com/ashrocket/squawk">github.com/ashrocket/squawk</a></div>
+</footer>
+
 </body>
 </html>
