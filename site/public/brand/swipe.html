@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>squawk — brand preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+
+  /* ── carousel ── */
+  .reel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .reel::-webkit-scrollbar { display: none; }
+  .slide {
+    min-width: 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  /* ── nav dots ── */
+  .dots {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transition: background .2s, transform .2s;
+    cursor: pointer;
+  }
+  .dot.active { background: #fff; transform: scale(1.3); }
+  .dot.dark { background: rgba(0,0,0,0.2); }
+  .dot.dark.active { background: #000; }
+
+  /* ── arrows ── */
+  .arr {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .arr:hover { background: rgba(255,255,255,0.28); }
+  .arr.left { left: 1rem; }
+  .arr.right { right: 1rem; }
+  .arr.dark-arr { background: rgba(0,0,0,0.07); color: #222; }
+  .arr.dark-arr:hover { background: rgba(0,0,0,0.14); }
+
+  /* ── label ── */
+  .slide-label {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.45;
+  }
+
+  /* ════════════════════════════════════════
+     SLIDE 1 — Stripe 2017
+     Deep indigo, clean, premium B2B
+  ════════════════════════════════════════ */
+  .s1 {
+    background: #32325d;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #fff;
+  }
+  .s1 .mark {
+    width: 52px; height: 52px;
+    background: #6772e5;
+    border-radius: 14px;
+    margin: 0 auto 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .s1 .mark svg { width: 28px; height: 28px; }
+  .s1 h1 {
+    font-size: 3rem; font-weight: 300;
+    letter-spacing: -0.02em; line-height: 1.1;
+    color: #fff;
+    max-width: 680px;
+  }
+  .s1 h1 strong { font-weight: 700; }
+  .s1 .tagline {
+    margin-top: 1rem; font-size: 1.1rem; font-weight: 400;
+    color: rgba(255,255,255,0.62); max-width: 520px;
+  }
+  .s1 .btns { margin-top: 2.2rem; display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
+  .s1 .btn-a {
+    padding: 0.8rem 2rem; border-radius: 4px;
+    background: #6772e5; color: #fff; font-weight: 600;
+    font-size: 0.95rem; border: none; cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .s1 .btn-b {
+    padding: 0.8rem 2rem; border-radius: 4px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    color: #fff; font-size: 0.95rem; font-weight: 500;
+    background: transparent; cursor: pointer;
+  }
+  .s1 .wordmark { font-size: 0.95rem; font-weight: 700; color: #fff; letter-spacing: 0.04em; opacity: 0.6; }
+
+  /* ════════════════════════════════════════
+     SLIDE 2 — Mailchimp 2017
+     Cream/yellow, quirky, humanist
+  ════════════════════════════════════════ */
+  .s2 {
+    background: #fffde7;
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #241c15;
+  }
+  .s2 .mark {
+    width: 72px; height: 72px;
+    background: #ffe01b;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    border: 3px solid #241c15;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+  }
+  .s2 h1 {
+    font-size: 3.4rem; font-weight: 700; line-height: 1.1;
+    color: #241c15; letter-spacing: -0.02em;
+    max-width: 680px; font-style: italic;
+  }
+  .s2 .tagline {
+    margin-top: 1rem; font-size: 1.1rem;
+    color: #5c5040; max-width: 480px;
+    font-style: normal; font-family: -apple-system, Arial, sans-serif;
+  }
+  .s2 .btns { margin-top: 2.2rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+  .s2 .btn-a {
+    padding: 0.85rem 2.2rem; border-radius: 0;
+    background: #241c15; color: #ffe01b;
+    font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer;
+    font-family: -apple-system, Arial, sans-serif;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .s2 .btn-b {
+    padding: 0.85rem 2.2rem; border-radius: 0;
+    border: 2px solid #241c15; color: #241c15;
+    font-size: 0.9rem; font-weight: 700; background: transparent; cursor: pointer;
+    font-family: -apple-system, Arial, sans-serif;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .s2 .wordmark {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 1rem; font-weight: 900; color: #241c15;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  /* ════════════════════════════════════════
+     SLIDE 3 — Notion 2019
+     Pure white, ultra-minimal, editorial
+  ════════════════════════════════════════ */
+  .s3 {
+    background: #fff;
+    font-family: "Georgia", serif;
+    color: #111;
+  }
+  .s3 .mark {
+    width: 40px; height: 40px;
+    border: 2px solid #111;
+    border-radius: 6px;
+    margin: 0 auto 1.8rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .s3 .mark svg { width: 20px; height: 20px; }
+  .s3 h1 {
+    font-size: 3.8rem; font-weight: 700; line-height: 1.0;
+    color: #111; letter-spacing: -0.03em;
+    max-width: 680px;
+  }
+  .s3 .tagline {
+    margin-top: 1.1rem; font-size: 1rem;
+    color: #555; max-width: 460px;
+    font-family: -apple-system, Arial, sans-serif;
+    font-weight: 400; line-height: 1.6;
+  }
+  .s3 hr { width: 40px; border: none; border-top: 1.5px solid #ddd; margin: 1.6rem auto; }
+  .s3 .btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .s3 .btn-a {
+    padding: 0.75rem 1.8rem; border-radius: 0;
+    background: #111; color: #fff;
+    font-weight: 600; font-size: 0.88rem; border: none; cursor: pointer;
+    font-family: -apple-system, Arial, sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .s3 .btn-b {
+    padding: 0.75rem 1.8rem; border-radius: 0;
+    border: 1px solid #ddd; color: #555;
+    font-size: 0.88rem; background: transparent; cursor: pointer;
+    font-family: -apple-system, Arial, sans-serif;
+  }
+  .s3 .wordmark {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 0.85rem; font-weight: 700; color: #111;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* ════════════════════════════════════════
+     SLIDE 4 — Twilio 2018
+     Bold red, developer, API-first
+  ════════════════════════════════════════ */
+  .s4 {
+    background: #f22f46;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #fff;
+  }
+  .s4 .mark {
+    width: 56px; height: 56px;
+    background: #fff;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 900; color: #f22f46;
+  }
+  .s4 h1 {
+    font-size: 3.2rem; font-weight: 800; line-height: 1.05;
+    color: #fff; letter-spacing: -0.025em;
+    max-width: 640px;
+  }
+  .s4 .tagline {
+    margin-top: 1rem; font-size: 1rem;
+    color: rgba(255,255,255,0.75); max-width: 480px;
+  }
+  .s4 .code-strip {
+    margin-top: 1.6rem;
+    background: rgba(0,0,0,0.22);
+    border-radius: 4px;
+    padding: 0.7rem 1.2rem;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 0.82rem;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .s4 .btns { margin-top: 1.6rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+  .s4 .btn-a {
+    padding: 0.8rem 2rem; border-radius: 3px;
+    background: #fff; color: #f22f46;
+    font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .s4 .btn-b {
+    padding: 0.8rem 2rem; border-radius: 3px;
+    border: 2px solid rgba(255,255,255,0.55);
+    color: #fff; font-size: 0.9rem; font-weight: 700;
+    background: transparent; cursor: pointer;
+  }
+  .s4 .wordmark { font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: 0.02em; }
+
+  /* ════════════════════════════════════════
+     SLIDE 5 — Segment / Amplitude 2018
+     Dark tech, green accent, data infra
+  ════════════════════════════════════════ */
+  .s5 {
+    background: #131415;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #fff;
+  }
+  .s5 .mark {
+    margin: 0 auto 1.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    justify-content: center;
+  }
+  .s5 .bar { width: 8px; background: #52bd94; border-radius: 2px; }
+  .s5 h1 {
+    font-size: 3rem; font-weight: 700; line-height: 1.1;
+    color: #f5f5f5; letter-spacing: -0.025em;
+    max-width: 640px;
+  }
+  .s5 h1 em { color: #52bd94; font-style: normal; }
+  .s5 .tagline {
+    margin-top: 1rem; font-size: 0.98rem;
+    color: #888; max-width: 480px; line-height: 1.6;
+  }
+  .s5 .pills {
+    margin-top: 1.4rem; display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center;
+  }
+  .s5 .pill {
+    padding: 0.3rem 0.75rem; border-radius: 100px;
+    background: #1e2020; border: 1px solid #2d2f2f;
+    font-size: 0.78rem; color: #888; font-weight: 500;
+  }
+  .s5 .btns { margin-top: 1.6rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+  .s5 .btn-a {
+    padding: 0.8rem 2rem; border-radius: 4px;
+    background: #52bd94; color: #000;
+    font-weight: 700; font-size: 0.92rem; border: none; cursor: pointer;
+  }
+  .s5 .btn-b {
+    padding: 0.8rem 2rem; border-radius: 4px;
+    border: 1px solid #2d2f2f; color: #ccc;
+    font-size: 0.92rem; background: transparent; cursor: pointer;
+  }
+  .s5 .wordmark { font-size: 0.92rem; font-weight: 700; color: #f5f5f5; }
+
+  /* ════════════════════════════════════════
+     SLIDE 6 — Deep Navy + Aqua Mint
+     Dark ocean, terminal vibes, dev tool
+  ════════════════════════════════════════ */
+  .s6 {
+    background: #0A192F;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #CCD6F6;
+  }
+  .s6 .braces {
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 1.5rem; font-weight: 700;
+    color: #64FFDA; letter-spacing: -0.02em;
+  }
+  .s6 h1 {
+    font-size: 3.2rem; font-weight: 700; line-height: 1.1;
+    color: #E6F1FF; letter-spacing: -0.025em;
+    max-width: 640px;
+  }
+  .s6 .tagline {
+    margin-top: 1rem; font-size: 1.05rem;
+    color: #8892B0; max-width: 500px; line-height: 1.6;
+  }
+  .s6 .agent-row {
+    margin-top: 1.5rem; display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center;
+  }
+  .s6 .agent {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.38rem 0.85rem; border-radius: 5px;
+    background: rgba(100,255,218,0.04);
+    border: 1px solid rgba(100,255,218,0.1);
+    font-size: 0.78rem; color: #8892B0;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  .s6 .adot { width: 8px; height: 8px; border-radius: 50%; }
+  .s6 .btns { margin-top: 1.8rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+  .s6 .btn-a {
+    padding: 0.8rem 2.1rem; border-radius: 4px;
+    background: #64FFDA; color: #0A192F;
+    font-weight: 700; font-size: 0.92rem; border: none; cursor: pointer;
+  }
+  .s6 .btn-b {
+    padding: 0.8rem 2.1rem; border-radius: 4px;
+    border: 1px solid rgba(100,255,218,0.3);
+    color: #64FFDA; font-size: 0.92rem; background: transparent; cursor: pointer;
+  }
+  .s6 .wordmark { font-size: 0.95rem; font-weight: 700; color: #CCD6F6; }
+</style>
+</head>
+<body>
+
+<div class="reel" id="reel">
+
+  <!-- ── SLIDE 1: Stripe 2017 ── -->
+  <div class="slide s1">
+    <div class="slide-label" style="color:rgba(255,255,255,0.4)">1 / 6 — Stripe Dark</div>
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:3rem;">
+      <div class="mark">
+        <svg viewBox="0 0 28 28" fill="none">
+          <rect x="4" y="8" width="20" height="3" rx="1.5" fill="#fff"/>
+          <rect x="4" y="13" width="14" height="3" rx="1.5" fill="#fff"/>
+          <rect x="18" y="13" width="3" height="3" rx="1" fill="#a5b4fc"/>
+          <rect x="22" y="13" width="2" height="3" rx="1" fill="#a5b4fc"/>
+          <rect x="4" y="18" width="8" height="3" rx="1.5" fill="rgba(255,255,255,0.35)"/>
+        </svg>
+      </div>
+      <span class="wordmark" style="font-size:1.15rem;opacity:1;letter-spacing:0.02em;">squawk</span>
+    </div>
+    <h1>Voice as <strong>infrastructure</strong>.</h1>
+    <p class="tagline">Every Claude Code agent speaks with a distinct voice — one channel, radio-operator rules, entirely on your Mac.</p>
+    <div class="btns">
+      <button class="btn-a">View on GitHub</button>
+      <button class="btn-b">Quick start →</button>
+    </div>
+    <div style="margin-top:2rem;font-size:0.78rem;color:rgba(255,255,255,0.3);letter-spacing:0.05em;text-transform:uppercase;">Free & Open Source · MIT · macOS</div>
+  </div>
+
+  <!-- ── SLIDE 2: Mailchimp 2017 ── -->
+  <div class="slide s2">
+    <div class="slide-label" style="color:rgba(36,28,21,0.35)">2 / 6 — Mailchimp Cream</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:2.5rem;">
+      <div class="mark">📡</div>
+      <span class="wordmark" style="font-size:1.4rem;">SQUAWK</span>
+    </div>
+    <h1>Your agents now have a voice.</h1>
+    <p class="tagline">Whisper.cpp on Metal listens. Kokoro and Apple neural voices speak. Every Claude agent gets its own character. All on your Mac.</p>
+    <div class="btns">
+      <button class="btn-a">Get Started Free</button>
+      <button class="btn-b">Read the Docs</button>
+    </div>
+    <div style="margin-top:2rem;font-size:0.8rem;color:#9c8570;letter-spacing:0.05em;font-family:-apple-system,Arial,sans-serif;text-transform:uppercase;">MIT · No cloud. Nothing leaves your Mac.</div>
+  </div>
+
+  <!-- ── SLIDE 3: Notion 2019 ── -->
+  <div class="slide s3">
+    <div class="slide-label" style="color:rgba(0,0,0,0.25)">3 / 6 — Notion Minimal</div>
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:2.5rem;">
+      <div class="mark">
+        <svg viewBox="0 0 20 20" fill="none">
+          <rect x="3" y="5" width="14" height="2" rx="1" fill="#111"/>
+          <rect x="3" y="9" width="10" height="2" rx="1" fill="#111"/>
+          <rect x="3" y="13" width="6" height="2" rx="1" fill="#111"/>
+          <rect x="14" y="11" width="3" height="5" rx="1" fill="#111"/>
+          <rect x="14" y="9" width="2" height="5" rx="1" fill="#111"/>
+        </svg>
+      </div>
+      <span class="wordmark">SQUAWK</span>
+    </div>
+    <h1>Voices for the agents building your code.</h1>
+    <p class="tagline">A local voice layer for Claude Code. One audio channel. Radio-operator coordination. Every agent speaks differently.</p>
+    <hr>
+    <div class="btns">
+      <button class="btn-a">View on GitHub</button>
+      <button class="btn-b">Quick start</button>
+    </div>
+    <div style="margin-top:1.8rem;font-size:0.78rem;color:#bbb;letter-spacing:0.04em;font-family:-apple-system,Arial,sans-serif;text-transform:uppercase;">Free & open source · macOS</div>
+  </div>
+
+  <!-- ── SLIDE 4: Twilio 2018 ── -->
+  <div class="slide s4">
+    <div class="slide-label" style="color:rgba(255,255,255,0.4)">4 / 6 — Twilio Red</div>
+    <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:2.2rem;">
+      <div class="mark" style="font-family:'SF Mono',monospace;font-size:1.2rem;">sq</div>
+      <span class="wordmark">squawk</span>
+    </div>
+    <h1>Add voice to your Claude agents in 3 lines.</h1>
+    <div class="code-strip">git clone github.com/ashrocket/squawk &amp;&amp; ./setup.sh &amp;&amp; ./voice</div>
+    <p class="tagline" style="margin-top:1rem;">whisper.cpp Metal STT · Kokoro + Apple TTS · Radio-operator rules. Fully local.</p>
+    <div class="btns">
+      <button class="btn-a">Get the code</button>
+      <button class="btn-b">View docs</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: Segment 2018 ── -->
+  <div class="slide s5">
+    <div class="slide-label" style="color:rgba(255,255,255,0.25)">5 / 6 — Segment Dark</div>
+    <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:2.5rem;">
+      <div class="mark">
+        <div class="bar" style="height:16px;"></div>
+        <div class="bar" style="height:24px;"></div>
+        <div class="bar" style="height:20px;"></div>
+        <div class="bar" style="height:28px;"></div>
+        <div class="bar" style="height:16px;"></div>
+      </div>
+      <span class="wordmark" style="font-size:1.15rem;">squawk</span>
+    </div>
+    <h1>One <em>voice channel</em> for all your agents.</h1>
+    <p class="tagline">Local speech recognition and synthesis for Claude Code. Agents coordinate — one talks, the rest stand by.</p>
+    <div class="pills">
+      <span class="pill">whisper.cpp Metal</span>
+      <span class="pill">Kokoro TTS</span>
+      <span class="pill">Apple Neural</span>
+      <span class="pill">radio protocol</span>
+      <span class="pill">fully local</span>
+    </div>
+    <div class="btns">
+      <button class="btn-a">Get started free</button>
+      <button class="btn-b">GitHub →</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: Deep Navy + Aqua Mint ── -->
+  <div class="slide s6">
+    <div class="slide-label" style="color:rgba(204,214,246,0.3)">6 / 6 — Deep Navy</div>
+    <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:2rem;">
+      <div class="braces">{ sq }</div>
+      <span class="wordmark">squawk</span>
+    </div>
+    <h1>Every agent has something to say.</h1>
+    <p class="tagline">Your Claude Code agents, finally with voices. One channel, radio-operator rules so they never talk over each other.</p>
+    <div class="agent-row">
+      <div class="agent"><div class="adot" style="background:#64FFDA;"></div>assistant speaking</div>
+      <div class="agent"><div class="adot" style="background:#8892B0;border:1px solid #64FFDA;"></div>scout listening</div>
+      <div class="agent"><div class="adot" style="background:#233554;border:1px solid #8892B0;"></div>builder on hold</div>
+    </div>
+    <div class="btns">
+      <button class="btn-a">Get squawk free</button>
+      <button class="btn-b">View on GitHub</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- dots -->
+<div class="dots" id="dots">
+  <div class="dot active" onclick="go(0)"></div>
+  <div class="dot" onclick="go(1)"></div>
+  <div class="dot" onclick="go(2)"></div>
+  <div class="dot" onclick="go(3)"></div>
+  <div class="dot" onclick="go(4)"></div>
+  <div class="dot" onclick="go(5)"></div>
+</div>
+
+<!-- arrows -->
+<button class="arr left" id="arrL" onclick="step(-1)">‹</button>
+<button class="arr right" id="arrR" onclick="step(1)">›</button>
+
+<script>
+  const reel = document.getElementById('reel');
+  const dots = document.querySelectorAll('.dot');
+  const arrL = document.getElementById('arrL');
+  const arrR = document.getElementById('arrR');
+
+  // slides with light backgrounds — need dark UI chrome (0-indexed)
+  const lightSlides = new Set([1, 2]); // Mailchimp, Notion
+
+  let cur = 0;
+  const total = 6;
+
+  function go(n) {
+    const wrapped = n < 0 || n >= total;
+    cur = ((n % total) + total) % total;
+    if (wrapped) {
+      reel.style.scrollBehavior = 'auto';
+      reel.scrollLeft = cur * window.innerWidth;
+      requestAnimationFrame(() => reel.style.removeProperty('scroll-behavior'));
+    } else {
+      reel.scrollTo({ left: cur * window.innerWidth, behavior: 'smooth' });
+    }
+    update();
+  }
+  function step(d) { go(cur + d); }
+
+  function update() {
+    const isLight = lightSlides.has(cur);
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === cur);
+      d.classList.toggle('dark', isLight);
+    });
+    arrL.className = 'arr left' + (isLight ? ' dark-arr' : '');
+    arrR.className = 'arr right' + (isLight ? ' dark-arr' : '');
+    // no opacity dimming — it wraps now
+  }
+
+  reel.addEventListener('scroll', () => {
+    const n = Math.round(reel.scrollLeft / window.innerWidth);
+    if (n !== cur) { cur = n; update(); }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+
+  update();
+</script>
+</body>
+</html>

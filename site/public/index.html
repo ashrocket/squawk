@@ -3,347 +3,754 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>squawk — voices for your Claude Code agents on macOS</title>
-<meta name="description" content="Talk to Claude hands-free. Every agent in your cmux setup speaks with its own voice — fully local STT/TTS, one audio channel, radio-operator rules.">
+<title>squawk — vote for your favorite brand</title>
+<meta name="description" content="10 brand directions for squawk, the voice layer for Claude Code agents. Pick your favorite with a GitHub login.">
 <link rel="icon" type="image/png" href="/icon.png">
-<meta property="og:title" content="squawk — voices for your Claude Code agents on macOS">
-<meta property="og:description" content="Talk to Claude hands-free. Every agent speaks with its own voice — fully local STT/TTS, one audio channel, radio-operator rules. Free & open source.">
+<meta property="og:title" content="squawk — vote for your favorite brand">
+<meta property="og:description" content="10 brand directions. One vote. GitHub login required.">
 <meta property="og:url" content="https://squawk.raiteri.net">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://squawk.raiteri.net/icon.png">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://squawk.raiteri.net/icon.png">
+<!-- Cloudflare Web Analytics — replace token after enabling in CF dashboard -->
+<!-- <script defer src='https://static.cloudflare.com/beacon.js' data-cf-beacon='{"token":"REPLACE_WITH_CF_WEB_ANALYTICS_TOKEN"}'></script> -->
 <style>
-  :root {
-    --navy: #1c2b3a;
-    --slate: #637282;
-    --blue: #1f8ded;
-    --blue-dark: #1668c8;
-    --green: #2ecc71;
-    --bg: #ffffff;
-    --bg-soft: #f5f8ff;
-    --line: #e3e8ef;
-    --nav-h: 60px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    padding-top: var(--nav-h);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    color: var(--navy);
-    background: var(--bg);
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: var(--blue); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 1.75rem; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
 
-  /* ---- NAV ---- */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    height: var(--nav-h);
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 1.75rem;
-    z-index: 100;
-  }
-  .nav-logo {
-    font-size: 1.1rem; font-weight: 700;
-    color: var(--navy); text-decoration: none !important;
-    display: flex; align-items: center; gap: 0.4rem;
-    letter-spacing: -0.01em;
-  }
-  .nav-links { display: flex; align-items: center; gap: 1.5rem; }
-  .nav-links a {
-    font-size: 0.9rem; font-weight: 500;
-    color: var(--slate); text-decoration: none;
-  }
-  .nav-links a:hover { color: var(--navy); }
-  .nav-cta {
-    display: inline-flex; align-items: center;
-    padding: 0.45rem 1.15rem; border-radius: 100px;
-    font-size: 0.88rem; font-weight: 600;
-    background: var(--blue); color: #fff;
-    text-decoration: none !important;
-    transition: background .12s;
-  }
-  .nav-cta:hover { background: var(--blue-dark); }
+/* ── CAROUSEL ── */
+.reel {
+  display: flex;
+  width: 100%; height: 100%;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.reel::-webkit-scrollbar { display: none; }
+.slide {
+  min-width: 100vw; height: 100vh;
+  scroll-snap-align: start;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  padding: 4rem 2rem 8rem;
+  text-align: center;
+}
 
-  /* ---- HERO ---- */
-  header {
-    text-align: center;
-    padding: 6.5rem 1.75rem 5rem;
-    background: var(--bg);
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    margin-bottom: 2rem;
-    padding: 0.3rem 0.9rem;
-    font-size: 0.77rem; font-weight: 700;
-    letter-spacing: 0.07em; text-transform: uppercase;
-    color: var(--slate);
-    border: 1px solid var(--line);
-    border-radius: 100px;
-    background: var(--bg-soft);
-  }
-  .badge::before {
-    content: "";
-    width: 0.48rem; height: 0.48rem; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 0 3px rgba(46,204,113,0.22);
-  }
-  h1 {
-    font-size: 4rem; font-weight: 700;
-    letter-spacing: -0.035em; line-height: 1.05;
-    color: var(--navy);
-  }
-  h1 .bird { vertical-align: -0.05em; margin-right: 0.1rem; }
-  .tagline {
-    max-width: 580px; margin: 1.3rem auto 0;
-    font-size: 1.2rem; font-weight: 400;
-    color: var(--slate);
-  }
-  .tagline a { font-weight: 500; }
-  .cta { margin-top: 2.2rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-  .btn-primary {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 0.85rem 2.1rem; border-radius: 100px;
-    font-size: 1rem; font-weight: 600; text-decoration: none !important;
-    background: var(--blue); color: #fff;
-    box-shadow: 0 2px 14px rgba(31,141,237,0.30);
-    transition: transform .12s, box-shadow .12s, background .12s;
-  }
-  .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(31,141,237,0.38); }
-  .btn-outline {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 0.85rem 2.1rem; border-radius: 100px;
-    font-size: 1rem; font-weight: 600; text-decoration: none !important;
-    color: var(--navy); border: 1.5px solid var(--line);
-    transition: border-color .12s, background .12s;
-  }
-  .btn-outline:hover { border-color: #b0bac6; background: var(--bg-soft); }
-  .quick {
-    max-width: 580px; margin: 2.8rem auto 0; text-align: left;
-  }
-  pre {
-    margin: 0; padding: 1.1rem 1.4rem; overflow-x: auto;
-    font-size: 0.86rem; line-height: 1.6;
-    color: #c6d8f0; background: var(--navy);
-    border-radius: 10px; box-shadow: 0 8px 32px rgba(28,43,58,0.14);
-  }
-  code { font-family: "SF Mono", Menlo, Consolas, monospace; }
-  .local-note {
-    max-width: 640px; margin: 2rem auto 0;
-    font-size: 0.91rem; color: var(--slate);
-  }
-  .local-note strong { color: var(--navy); font-weight: 600; }
+/* ── DOTS ── */
+.dots {
+  position: fixed; bottom: 1.1rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 0.38rem;
+  z-index: 200;
+}
+.dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: background .2s, transform .2s;
+  cursor: pointer;
+}
+.dot.active { background: #fff; transform: scale(1.4); }
+.dot.dark { background: rgba(0,0,0,0.18); }
+.dot.dark.active { background: rgba(0,0,0,0.7); }
 
-  /* ---- STRIP ---- */
-  .strip {
-    padding: 1.4rem 1.75rem;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    text-align: center;
-    font-size: 0.97rem; color: var(--slate);
-  }
+/* ── ARROWS ── */
+.arr {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  z-index: 200; border: none; cursor: pointer;
+  background: rgba(255,255,255,0.11); color: #fff;
+  font-size: 1.5rem; width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+  user-select: none; -webkit-user-select: none;
+}
+.arr:hover { background: rgba(255,255,255,0.22); }
+.arr.left { left: 1rem; }
+.arr.right { right: 1rem; }
+.arr.dk { background: rgba(0,0,0,0.07); color: #222; }
+.arr.dk:hover { background: rgba(0,0,0,0.13); }
 
-  /* ---- SECTIONS ---- */
-  .section { padding: 5rem 0; }
-  .section-white { background: var(--bg); }
-  .section-soft { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  h2 {
-    font-size: 1.9rem; font-weight: 700;
-    letter-spacing: -0.02em; color: var(--navy);
-    text-align: center; margin-bottom: 0.6rem;
-  }
-  .section-lead {
-    text-align: center; color: var(--slate);
-    font-size: 1.02rem; margin-bottom: 3rem;
-    max-width: 520px; margin-left: auto; margin-right: auto;
-  }
-  .section-lead + * { margin-top: 3rem; }
+/* ── VOTE BAR ── */
+#vote-bar {
+  position: fixed; bottom: 2.8rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0.8rem;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  color: #fff; padding: 0.58rem 0.85rem 0.58rem 1rem;
+  border-radius: 100px; font-size: 0.82rem;
+  z-index: 300; border: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap; max-width: calc(100vw - 2rem);
+}
+#vb-name { font-weight: 600; opacity: 0.9; }
+#vb-sep { opacity: 0.25; }
+#vb-count { opacity: 0.62; min-width: 3.5rem; }
+#vb-btn {
+  padding: 0.34rem 0.9rem; border-radius: 100px;
+  font-size: 0.79rem; font-weight: 600;
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff; cursor: pointer;
+  transition: background .15s; flex-shrink: 0;
+}
+#vb-btn:hover:not(:disabled) { background: rgba(255,255,255,0.22); }
+#vb-btn:disabled { opacity: 0.5; cursor: default; }
+#vb-btn.voted { background: rgba(46,204,113,0.22); border-color: rgba(46,204,113,0.38); color: #5affa0; }
 
-  /* ---- FEATURE GRID ---- */
-  .features {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .feat {
-    padding: 1.75rem 1.6rem;
-    border-right: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-  }
-  .feat:nth-child(3n) { border-right: none; }
-  /* overflow:hidden clips last-row border-bottom; outer border provides the edge */
-  .feat-icon { font-size: 1.5rem; display: block; margin-bottom: 0.7rem; }
-  .feat h3 {
-    font-size: 0.8rem; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--blue); margin-bottom: 0.4rem;
-  }
-  .feat p { font-size: 0.92rem; color: var(--slate); }
+/* ── AUTH BAR ── */
+#auth-bar {
+  position: fixed; top: 1rem; right: 1.1rem;
+  z-index: 300; display: flex; align-items: center; gap: 0.55rem;
+}
+.auth-avatar { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.28); }
+.auth-name { font-size: 0.77rem; color: rgba(255,255,255,0.82); font-weight: 500; text-shadow: 0 1px 5px rgba(0,0,0,0.6); }
+.auth-link {
+  font-size: 0.77rem; padding: 0.28rem 0.75rem; border-radius: 100px;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.78); border: 1px solid rgba(255,255,255,0.13);
+  cursor: pointer; text-decoration: none; font-weight: 500;
+}
+.auth-link:hover { background: rgba(0,0,0,0.65); }
+.auth-logout {
+  font-size: 0.7rem; color: rgba(255,255,255,0.42);
+  cursor: pointer; background: none; border: none;
+  text-decoration: underline; text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
 
-  /* ---- DIAGRAM ---- */
-  .diagram {
-    max-width: 680px; margin: 0 auto;
-    color: #c6d8f0; background: var(--navy);
-    border-radius: 10px;
-    font-size: 0.84rem; line-height: 1.8;
-  }
+/* ── SLIDE COUNTER ── */
+#counter {
+  position: fixed; bottom: 0.75rem; right: 1.2rem;
+  font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); z-index: 201;
+  font-weight: 600;
+}
+#counter.dk { color: rgba(0,0,0,0.28); }
 
-  /* ---- VIDEOS ---- */
-  .videos {
-    max-width: 680px; margin: 0 auto;
-    padding: 3rem 2rem;
-    text-align: center; font-size: 1rem; color: var(--slate);
-    border: 1.5px dashed var(--line); border-radius: 10px;
-  }
+/* ════════════════════════════════════════
+   SLIDE 1 — Stripe 2017
+   Deep indigo, clean, premium B2B
+════════════════════════════════════════ */
+.s1 { background: #32325d; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+.s1 .mark {
+  width: 50px; height: 50px; background: #6772e5; border-radius: 13px;
+  margin: 0 auto 1.4rem; display: flex; align-items: center; justify-content: center;
+}
+.s1 .logo-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 2.8rem; }
+.s1 .wm { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.02em; color: #fff; opacity: 0.85; }
+.s1 h1 { font-size: 3rem; font-weight: 300; letter-spacing: -0.02em; line-height: 1.1; max-width: 640px; }
+.s1 h1 strong { font-weight: 700; }
+.s1 .tl { margin-top: 1rem; font-size: 1.05rem; color: rgba(255,255,255,0.58); max-width: 500px; }
+.s1 .btns { margin-top: 2rem; display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap; }
+.s1 .btn-a { padding: 0.78rem 1.9rem; border-radius: 4px; background: #6772e5; color: #fff; font-weight: 600; font-size: 0.92rem; border: none; cursor: pointer; }
+.s1 .btn-b { padding: 0.78rem 1.9rem; border-radius: 4px; border: 1.5px solid rgba(255,255,255,0.38); color: #fff; font-size: 0.92rem; background: transparent; cursor: pointer; }
+.s1 .foot { margin-top: 1.8rem; font-size: 0.76rem; color: rgba(255,255,255,0.28); letter-spacing: 0.05em; text-transform: uppercase; }
 
-  /* ---- FOOTER ---- */
-  footer {
-    border-top: 1px solid var(--line);
-    padding: 1.5rem 1.75rem;
-    display: flex; justify-content: space-between; flex-wrap: wrap;
-    gap: 0.4rem 1rem;
-    font-size: 0.88rem; color: var(--slate);
-  }
-  footer a { color: var(--slate); }
-  footer a:hover { color: var(--navy); }
+/* ════════════════════════════════════════
+   SLIDE 2 — Mailchimp 2017
+   Cream/yellow, quirky, humanist
+════════════════════════════════════════ */
+.s2 { background: #fffde7; font-family: "Georgia", "Times New Roman", serif; color: #241c15; }
+.s2 .mark { width: 66px; height: 66px; background: #ffe01b; border-radius: 50%; border: 3px solid #241c15; margin: 0 auto 1.4rem; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+.s2 .logo-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2.5rem; }
+.s2 .wm { font-size: 1.3rem; font-weight: 900; letter-spacing: 0.05em; font-family: -apple-system, Arial, sans-serif; }
+.s2 h1 { font-size: 3.2rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; font-style: italic; max-width: 660px; }
+.s2 .tl { margin-top: 0.9rem; font-size: 1rem; color: #5c5040; max-width: 460px; font-style: normal; font-family: -apple-system, Arial, sans-serif; }
+.s2 .btns { margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.s2 .btn-a { padding: 0.82rem 1.9rem; background: #241c15; color: #ffe01b; font-weight: 700; border: none; cursor: pointer; font-family: -apple-system, Arial, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.86rem; }
+.s2 .btn-b { padding: 0.82rem 1.9rem; border: 2px solid #241c15; color: #241c15; font-weight: 700; background: transparent; cursor: pointer; font-family: -apple-system, Arial, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.86rem; }
+.s2 .foot { margin-top: 1.8rem; font-size: 0.76rem; color: #9c8570; letter-spacing: 0.05em; font-family: -apple-system, Arial, sans-serif; text-transform: uppercase; }
 
-  @media (max-width: 760px) {
-    h1 { font-size: 2.6rem; }
-    .tagline { font-size: 1.05rem; }
-    .btn-primary, .btn-outline { width: 100%; }
-    pre { font-size: 0.76rem; }
-    .features { grid-template-columns: 1fr; }
-    .feat { border-right: none; }
-    .feat:nth-last-child(-n+3) { border-bottom: 1px solid var(--line); }
-    .feat:last-child { border-bottom: none; }
-    nav { padding: 0 1rem; }
-    .nav-links { gap: 1rem; }
-  }
-  @media (max-width: 520px) {
-    .nav-links a:not(.nav-cta) { display: none; }
-  }
+/* ════════════════════════════════════════
+   SLIDE 3 — Notion 2019
+   Pure white, ultra-minimal, editorial
+════════════════════════════════════════ */
+.s3 { background: #fff; font-family: "Georgia", serif; color: #111; }
+.s3 .mark { width: 38px; height: 38px; border: 2px solid #111; border-radius: 6px; margin: 0 auto 1.6rem; display: flex; align-items: center; justify-content: center; }
+.s3 .logo-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 2.4rem; }
+.s3 .wm { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; font-family: -apple-system, Arial, sans-serif; color: #111; }
+.s3 h1 { font-size: 3.6rem; font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; max-width: 640px; }
+.s3 .tl { margin-top: 1rem; font-size: 0.97rem; color: #555; max-width: 440px; font-family: -apple-system, Arial, sans-serif; line-height: 1.6; }
+.s3 hr { width: 36px; border: none; border-top: 1.5px solid #ddd; margin: 1.5rem auto; }
+.s3 .btns { display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
+.s3 .btn-a { padding: 0.72rem 1.7rem; background: #111; color: #fff; font-weight: 600; border: none; cursor: pointer; font-family: -apple-system, Arial, sans-serif; font-size: 0.86rem; }
+.s3 .btn-b { padding: 0.72rem 1.7rem; border: 1px solid #ddd; color: #555; background: transparent; cursor: pointer; font-family: -apple-system, Arial, sans-serif; font-size: 0.86rem; }
+.s3 .foot { margin-top: 1.8rem; font-size: 0.74rem; color: #bbb; letter-spacing: 0.05em; font-family: -apple-system, Arial, sans-serif; text-transform: uppercase; }
+
+/* ════════════════════════════════════════
+   SLIDE 4 — Twilio 2018
+   Bold red, developer, API-first
+════════════════════════════════════════ */
+.s4 { background: #f22f46; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+.s4 .mark { width: 52px; height: 52px; background: #fff; border-radius: 50%; margin: 0 auto 1.4rem; display: flex; align-items: center; justify-content: center; font-family: "SF Mono", Menlo, monospace; font-size: 1.1rem; font-weight: 900; color: #f22f46; }
+.s4 .logo-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2rem; }
+.s4 .wm { font-size: 1.15rem; font-weight: 900; color: #fff; }
+.s4 h1 { font-size: 3rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.025em; max-width: 620px; }
+.s4 .code { margin-top: 1.4rem; background: rgba(0,0,0,0.22); border-radius: 4px; padding: 0.65rem 1.1rem; font-family: "SF Mono", Menlo, monospace; font-size: 0.78rem; max-width: 90%; word-break: break-all; }
+.s4 .tl { margin-top: 0.9rem; font-size: 0.95rem; color: rgba(255,255,255,0.72); max-width: 460px; }
+.s4 .btns { margin-top: 1.6rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.s4 .btn-a { padding: 0.78rem 1.9rem; border-radius: 3px; background: #fff; color: #f22f46; font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; }
+.s4 .btn-b { padding: 0.78rem 1.9rem; border-radius: 3px; border: 2px solid rgba(255,255,255,0.5); color: #fff; font-size: 0.9rem; font-weight: 700; background: transparent; cursor: pointer; }
+
+/* ════════════════════════════════════════
+   SLIDE 5 — Segment / Amplitude 2018
+   Dark tech, green accent, data infra
+════════════════════════════════════════ */
+.s5 { background: #131415; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+.s5 .mk5 { display: flex; align-items: flex-end; gap: 4px; height: 28px; margin: 0 auto 1.4rem; }
+.s5 .bar { width: 7px; background: #52bd94; border-radius: 2px; }
+.s5 .logo-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 2.4rem; }
+.s5 .wm { font-size: 1.1rem; font-weight: 700; color: #f5f5f5; }
+.s5 h1 { font-size: 3rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; color: #f5f5f5; max-width: 620px; }
+.s5 h1 em { color: #52bd94; font-style: normal; }
+.s5 .tl { margin-top: 0.95rem; font-size: 0.95rem; color: #888; max-width: 460px; line-height: 1.65; }
+.s5 .pills { margin-top: 1.3rem; display: flex; gap: 0.55rem; flex-wrap: wrap; justify-content: center; }
+.s5 .pill { padding: 0.28rem 0.7rem; border-radius: 100px; background: #1e2020; border: 1px solid #2d2f2f; font-size: 0.74rem; color: #888; }
+.s5 .btns { margin-top: 1.6rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.s5 .btn-a { padding: 0.78rem 1.9rem; border-radius: 4px; background: #52bd94; color: #000; font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer; }
+.s5 .btn-b { padding: 0.78rem 1.9rem; border-radius: 4px; border: 1px solid #2d2f2f; color: #ccc; font-size: 0.9rem; background: transparent; cursor: pointer; }
+
+/* ════════════════════════════════════════
+   SLIDE 6 — Deep Navy + Aqua Mint
+   Dark ocean, terminal vibes, dev tool
+   (not Slack colors)
+════════════════════════════════════════ */
+.s6 { background: #0A192F; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #CCD6F6; }
+.s6 .braces { font-family: "SF Mono", Menlo, monospace; font-size: 1.5rem; font-weight: 700; color: #64FFDA; margin-bottom: 1.4rem; letter-spacing: -0.02em; }
+.s6 .logo-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2.2rem; }
+.s6 .wm { font-size: 1.1rem; font-weight: 700; color: #CCD6F6; }
+.s6 h1 { font-size: 3.2rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; color: #E6F1FF; max-width: 620px; }
+.s6 .tl { margin-top: 1rem; font-size: 1.02rem; color: #8892B0; max-width: 480px; line-height: 1.65; }
+.s6 .agent-row { margin-top: 1.5rem; display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: center; }
+.s6 .agent {
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.38rem 0.8rem; border-radius: 5px;
+  background: rgba(100,255,218,0.04);
+  border: 1px solid rgba(100,255,218,0.1);
+  font-size: 0.76rem; color: #8892B0;
+  font-family: "SF Mono", Menlo, monospace;
+}
+.s6 .adot { width: 7px; height: 7px; border-radius: 50%; }
+.s6 .btns { margin-top: 1.8rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.s6 .btn-a { padding: 0.8rem 2rem; border-radius: 4px; background: #64FFDA; color: #0A192F; font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer; }
+.s6 .btn-b { padding: 0.8rem 2rem; border-radius: 4px; border: 1px solid rgba(100,255,218,0.3); color: #64FFDA; font-size: 0.9rem; background: transparent; cursor: pointer; }
+
+/* ════════════════════════════════════════
+   SLIDE 7 — Intercom / White Product
+   Clean SaaS, blue CTA, feature grid
+════════════════════════════════════════ */
+.s7 { background: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; color: #1c2b3a; }
+.s7 .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.28rem 0.8rem; font-size: 0.71rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #637282; border: 1px solid #e3e8ef; border-radius: 100px; background: #f5f8ff; margin-bottom: 1.8rem; }
+.s7 .badge::before { content: ""; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,0.2); }
+.s7 .logo-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.s7 .wm { font-size: 1.2rem; font-weight: 700; color: #1c2b3a; }
+.s7 h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -0.035em; line-height: 1.05; color: #1c2b3a; max-width: 640px; }
+.s7 .tl { margin: 1.1rem auto 0; font-size: 1.06rem; color: #637282; max-width: 480px; }
+.s7 .feats { display: flex; gap: 0.85rem; margin-top: 1.8rem; flex-wrap: wrap; justify-content: center; max-width: 520px; }
+.s7 .feat { display: flex; align-items: flex-start; gap: 0.45rem; text-align: left; background: #f5f8ff; border: 1px solid #e3e8ef; border-radius: 8px; padding: 0.75rem 0.9rem; flex: 1; min-width: 140px; }
+.s7 .ficon { font-size: 1rem; }
+.s7 .feat p { font-size: 0.76rem; color: #637282; line-height: 1.4; }
+.s7 .feat strong { font-size: 0.73rem; font-weight: 700; color: #1c2b3a; display: block; margin-bottom: 0.12rem; }
+.s7 .btns { margin-top: 1.7rem; display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
+.s7 .btn-a { padding: 0.78rem 1.9rem; border-radius: 100px; background: #1f8ded; color: #fff; font-weight: 600; font-size: 0.93rem; border: none; cursor: pointer; box-shadow: 0 2px 12px rgba(31,141,237,0.28); }
+.s7 .btn-b { padding: 0.78rem 1.9rem; border-radius: 100px; border: 1.5px solid #e3e8ef; color: #1c2b3a; font-size: 0.93rem; font-weight: 600; background: transparent; cursor: pointer; }
+
+/* ════════════════════════════════════════
+   SLIDE 8 — Linear 2023
+   Near-black, gradient headline, ultra-modern SaaS
+════════════════════════════════════════ */
+.s8 { background: #0F0E17; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+.s8 .mark {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #7C3AED, #2563EB);
+  border-radius: 12px; margin: 0 auto 1.4rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.s8 .logo-row { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 2.5rem; }
+.s8 .wm { font-size: 1.05rem; font-weight: 600; color: #fff; letter-spacing: -0.01em; }
+.s8 h1 {
+  font-size: 3.6rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; max-width: 640px;
+}
+.s8 .tl { margin-top: 1.1rem; font-size: 0.98rem; color: rgba(255,255,255,0.48); max-width: 480px; line-height: 1.65; }
+.s8 .btns { margin-top: 2rem; display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
+.s8 .btn-a { padding: 0.8rem 2rem; border-radius: 6px; background: linear-gradient(135deg, #7C3AED, #2563EB); color: #fff; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; }
+.s8 .btn-b { padding: 0.8rem 2rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.65); font-size: 0.9rem; background: transparent; cursor: pointer; }
+
+/* ════════════════════════════════════════
+   SLIDE 9 — Vercel Mono
+   Pure black, white, monospace, brutalist
+════════════════════════════════════════ */
+.s9 { background: #000; font-family: "SF Mono", "Courier New", monospace; color: #fff; }
+.s9 .terminal { text-align: left; max-width: 400px; }
+.s9 h1 { font-size: 5.5rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; font-family: inherit; }
+.s9 .lines { margin-top: 1.6rem; font-size: 0.86rem; color: rgba(255,255,255,0.42); line-height: 2.1; }
+.s9 .prompt { color: rgba(255,255,255,0.18); }
+.s9 .out { color: rgba(255,255,255,0.62); }
+.s9 .cursor { display: inline-block; width: 0.52rem; height: 1rem; background: rgba(255,255,255,0.75); margin-left: 1px; vertical-align: text-bottom; animation: blink 1.2s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.s9 .btns { margin-top: 2.2rem; display: flex; gap: 1.6rem; flex-wrap: wrap; }
+.s9 .btn-a { padding: 0; border: none; background: none; color: #fff; font-family: inherit; font-size: 0.84rem; cursor: pointer; text-decoration: underline; font-weight: 700; }
+.s9 .btn-b { padding: 0; border: none; background: none; color: rgba(255,255,255,0.38); font-family: inherit; font-size: 0.84rem; cursor: pointer; text-decoration: underline; }
+
+/* ════════════════════════════════════════
+   SLIDE 10 — Raycast / Arc Dark
+   macOS dark, gradient glow, power-user
+════════════════════════════════════════ */
+.s10 { background: #1C1C1E; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #fff; overflow: hidden; }
+.s10 .glow {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -60%);
+  width: 600px; height: 450px;
+  background: radial-gradient(ellipse at center, rgba(90,28,255,0.16) 0%, transparent 68%);
+  pointer-events: none;
+}
+.s10 .mark { width: 46px; height: 46px; background: linear-gradient(135deg, #5B1AFF, #B200FF); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.s10 .logo-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2.2rem; position: relative; }
+.s10 .wm { font-size: 1.05rem; font-weight: 600; color: #fff; }
+.s10 h1 { font-size: 3.4rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; max-width: 580px; position: relative; }
+.s10 .tl { margin-top: 1rem; font-size: 1rem; color: rgba(255,255,255,0.52); max-width: 430px; line-height: 1.6; position: relative; }
+.s10 .spotlight {
+  margin-top: 1.8rem; max-width: 360px; width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px; padding: 0.72rem 1rem;
+  display: flex; align-items: center; gap: 0.7rem;
+  font-size: 0.88rem; color: rgba(255,255,255,0.32);
+  position: relative;
+}
+.s10 .kbd { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 0.12rem 0.38rem; font-size: 0.72rem; color: rgba(255,255,255,0.48); }
+.s10 .btns { margin-top: 1.8rem; display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; position: relative; }
+.s10 .btn-a { padding: 0.78rem 2rem; border-radius: 8px; background: linear-gradient(135deg, #5B1AFF, #B200FF); color: #fff; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; box-shadow: 0 4px 22px rgba(91,26,255,0.32); }
+.s10 .btn-b { padding: 0.78rem 2rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.11); color: rgba(255,255,255,0.65); font-size: 0.9rem; background: rgba(255,255,255,0.04); cursor: pointer; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 540px) {
+  .s1 h1, .s2 h1, .s3 h1, .s4 h1, .s5 h1, .s6 h1, .s7 h1, .s8 h1, .s9 h1, .s10 h1 { font-size: 2.2rem; }
+  .s9 h1 { font-size: 4rem; }
+  #vb-name { display: none; }
+  #vb-sep { display: none; }
+  .arr { display: none; }
+  .s7 .feats { flex-direction: column; }
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="nav-logo" href="/"><span>🦜</span> squawk</a>
-  <div class="nav-links">
-    <a href="https://github.com/ashrocket/squawk">GitHub</a>
-    <a class="nav-cta" href="https://github.com/ashrocket/squawk#quick-start">Quick start</a>
-  </div>
-</nav>
+<!-- auth bar -->
+<div id="auth-bar"></div>
 
-<header>
-  <div class="badge">Free &amp; open source · MIT</div>
-  <h1><span class="bird">🦜</span> squawk</h1>
-  <p class="tagline">Voices for your Claude Code agents on macOS. Talk to Claude hands-free — every agent in your <a href="https://cmux.sh">cmux</a> setup speaks with its own voice.</p>
-  <div class="cta">
-    <a class="btn-primary" href="https://github.com/ashrocket/squawk">View on GitHub</a>
-    <a class="btn-outline" href="https://github.com/ashrocket/squawk#quick-start">Quick start →</a>
-  </div>
-  <div class="quick">
-    <pre><code>git clone https://github.com/ashrocket/squawk &amp;&amp; cd squawk
-./setup.sh
-./voice --user YourName   # speak when greeted</code></pre>
-  </div>
-  <p class="local-note"><strong>Fully local ears and voices.</strong> whisper.cpp (Metal) for speech-to-text, macOS neural voices or Kokoro for text-to-speech. Nothing leaves your Mac except what you already send to Claude.</p>
-</header>
+<!-- slide counter -->
+<div id="counter">1 / 10</div>
 
-<div class="strip">
-  No cloud STT, no cloud TTS, no extra API key. Runs entirely on your Mac.
-</div>
+<!-- carousel -->
+<div class="reel" id="reel">
 
-<div class="section section-white">
-  <div class="wrap">
-    <h2>Radio-operator rules for a crew of agents</h2>
-    <p class="section-lead">Run <code>voice</code> in every cmux tab. The agents coordinate automatically — one channel, no chaos.</p>
-    <div class="features">
-      <div class="feat">
-        <span class="feat-icon">🎙️</span>
-        <h3>Focus follows mic</h3>
-        <p>Only the focused window's agent listens; the rest stand by quietly.</p>
+  <!-- ── SLIDE 1: Stripe 2017 ── -->
+  <div class="slide s1">
+    <div class="logo-row">
+      <div class="mark">
+        <svg viewBox="0 0 28 28" width="26" height="26" fill="none">
+          <rect x="4" y="7" width="20" height="3" rx="1.5" fill="#fff"/>
+          <rect x="4" y="12" width="13" height="3" rx="1.5" fill="#fff"/>
+          <rect x="19" y="12" width="3" height="3" rx="1" fill="#a5b4fc"/>
+          <rect x="23" y="12" width="2" height="3" rx="1" fill="#a5b4fc"/>
+          <rect x="4" y="17" width="8" height="3" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+        </svg>
       </div>
-      <div class="feat">
-        <span class="feat-icon">📻</span>
-        <h3>Con-holding</h3>
-        <p>An active exchange keeps the mic for 75 s past the last turn — nobody steals the channel mid-thought.</p>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>Voice as <strong>infrastructure</strong>.</h1>
+    <p class="tl">Every Claude Code agent speaks with a distinct voice — one channel, radio-operator rules, entirely on your Mac.</p>
+    <div class="btns">
+      <button class="btn-a">View on GitHub</button>
+      <button class="btn-b">Quick start →</button>
+    </div>
+    <div class="foot">Free &amp; Open Source · MIT · macOS</div>
+  </div>
+
+  <!-- ── SLIDE 2: Mailchimp 2017 ── -->
+  <div class="slide s2">
+    <div class="logo-row">
+      <div class="mark">📡</div>
+      <span class="wm">SQUAWK</span>
+    </div>
+    <h1>Your agents now have a voice.</h1>
+    <p class="tl">whisper.cpp on Metal listens. Kokoro and Apple neural voices speak. Every Claude agent gets its own character.</p>
+    <div class="btns">
+      <button class="btn-a">Get Started Free</button>
+      <button class="btn-b">Read the Docs</button>
+    </div>
+    <div class="foot">MIT · Nothing leaves your Mac</div>
+  </div>
+
+  <!-- ── SLIDE 3: Notion 2019 ── -->
+  <div class="slide s3">
+    <div class="logo-row">
+      <div class="mark">
+        <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+          <rect x="3" y="4" width="14" height="2" rx="1" fill="#111"/>
+          <rect x="3" y="8" width="10" height="2" rx="1" fill="#111"/>
+          <rect x="3" y="12" width="6" height="2" rx="1" fill="#111"/>
+          <rect x="14" y="8" width="2" height="8" rx="1" fill="#111"/>
+        </svg>
       </div>
-      <div class="feat">
-        <span class="feat-icon">🗣️</span>
-        <h3>One talker</h3>
-        <p>A global speech lock. Agents queue; they never talk over each other.</p>
+      <span class="wm">SQUAWK</span>
+    </div>
+    <h1>Voices for the agents building your code.</h1>
+    <p class="tl">A local voice layer for Claude Code. One audio channel. Radio-operator coordination. Every agent speaks differently.</p>
+    <hr>
+    <div class="btns">
+      <button class="btn-a">View on GitHub</button>
+      <button class="btn-b">Quick start</button>
+    </div>
+    <div class="foot">Free &amp; open source · macOS</div>
+  </div>
+
+  <!-- ── SLIDE 4: Twilio 2018 ── -->
+  <div class="slide s4">
+    <div class="logo-row">
+      <div class="mark">sq</div>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>Add voice to your Claude agents in 3 lines.</h1>
+    <div class="code">git clone …/squawk &amp;&amp; ./setup.sh &amp;&amp; ./voice</div>
+    <p class="tl">whisper.cpp Metal STT · Kokoro + Apple TTS · Radio-operator rules. Fully local.</p>
+    <div class="btns">
+      <button class="btn-a">Get the code</button>
+      <button class="btn-b">View docs</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: Segment 2018 ── -->
+  <div class="slide s5">
+    <div class="logo-row">
+      <div class="mk5">
+        <div class="bar" style="height:14px;"></div>
+        <div class="bar" style="height:22px;"></div>
+        <div class="bar" style="height:18px;"></div>
+        <div class="bar" style="height:26px;"></div>
+        <div class="bar" style="height:14px;"></div>
       </div>
-      <div class="feat">
-        <span class="feat-icon">🎭</span>
-        <h3>Distinct voices</h3>
-        <p>Every agent auto-gets its own voice — Kokoro neural, Apple Premium, or system default, best first.</p>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>One <em>voice channel</em> for all your agents.</h1>
+    <p class="tl">Local speech recognition and synthesis for Claude Code. Agents coordinate — one talks, the rest stand by.</p>
+    <div class="pills">
+      <span class="pill">whisper.cpp Metal</span>
+      <span class="pill">Kokoro TTS</span>
+      <span class="pill">Apple Neural</span>
+      <span class="pill">radio protocol</span>
+      <span class="pill">fully local</span>
+    </div>
+    <div class="btns">
+      <button class="btn-a">Get started free</button>
+      <button class="btn-b">GitHub →</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: Deep Navy + Aqua Mint ── -->
+  <div class="slide s6">
+    <div class="logo-row">
+      <div class="braces">{ sq }</div>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>Every agent has something to say.</h1>
+    <p class="tl">Your Claude Code agents, finally with voices. One channel, radio-operator rules so they never talk over each other.</p>
+    <div class="agent-row">
+      <div class="agent"><div class="adot" style="background:#64FFDA;"></div>assistant speaking</div>
+      <div class="agent"><div class="adot" style="background:#8892B0;border:1px solid #64FFDA;"></div>scout listening</div>
+      <div class="agent"><div class="adot" style="background:#233554;border:1px solid #8892B0;"></div>builder on hold</div>
+    </div>
+    <div class="btns">
+      <button class="btn-a">Get squawk free</button>
+      <button class="btn-b">View on GitHub</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: Intercom White ── -->
+  <div class="slide s7">
+    <div class="badge">Free &amp; open source · MIT</div>
+    <div class="logo-row">
+      <span style="font-size:1.4rem;">🦜</span>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>Talk to Claude. Hands-free.</h1>
+    <p class="tl">Voices for your Claude Code agents on macOS. Every agent in your setup speaks with its own character — fully local.</p>
+    <div class="feats">
+      <div class="feat"><span class="ficon">🎙️</span><div><strong>Fully local</strong><p>whisper.cpp Metal STT, macOS neural TTS.</p></div></div>
+      <div class="feat"><span class="ficon">📻</span><div><strong>One channel</strong><p>Radio-operator rules. Agents never overlap.</p></div></div>
+      <div class="feat"><span class="ficon">🎭</span><div><strong>Distinct voices</strong><p>Every agent gets its own character.</p></div></div>
+    </div>
+    <div class="btns">
+      <button class="btn-a">View on GitHub</button>
+      <button class="btn-b">Quick start →</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: Linear Modern ── -->
+  <div class="slide s8">
+    <div class="logo-row">
+      <div class="mark">
+        <svg viewBox="0 0 26 26" width="24" height="24" fill="none">
+          <rect x="2" y="9" width="3" height="8" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+          <rect x="7" y="5" width="3" height="16" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+          <rect x="12" y="7" width="3" height="12" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+          <rect x="17" y="3" width="3" height="20" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+          <rect x="22" y="9" width="3" height="8" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+        </svg>
       </div>
-      <div class="feat">
-        <span class="feat-icon">📨</span>
-        <h3>Relay requests</h3>
-        <p>Background agents queue messages; the active conversation reads them aloud between turns.</p>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>Ship code by ear.</h1>
+    <p class="tl">The voice infrastructure your AI crew deserves. whisper.cpp on Metal, Kokoro TTS, radio-operator rules. Runs entirely on your Mac.</p>
+    <div class="btns">
+      <button class="btn-a">Get Started</button>
+      <button class="btn-b">GitHub →</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 9: Vercel Mono ── -->
+  <div class="slide s9">
+    <div class="terminal">
+      <h1>squawk.</h1>
+      <div class="lines">
+        <div><span class="prompt">$ </span><span class="out">voice for your claude agents</span></div>
+        <div><span class="prompt">$ </span><span class="out">runs locally on your mac</span></div>
+        <div><span class="prompt">$ </span><span class="out">free &amp; open source · mit</span></div>
+        <div><span class="prompt">$ </span><span class="cursor"></span></div>
       </div>
-      <div class="feat">
-        <span class="feat-icon">🔤</span>
-        <h3>Pronunciation learning</h3>
-        <p>Say "pronounce cmux as sea mux" once — every agent and every voice learns it, in speech and hearing.</p>
-      </div>
-      <div class="feat">
-        <span class="feat-icon">⚡</span>
-        <h3>Barge-in</h3>
-        <p>Start talking over the assistant and it stops to listen. Experimental, but it works.</p>
-      </div>
-      <div class="feat">
-        <span class="feat-icon">🖥️</span>
-        <h3>Squawk.app</h3>
-        <p>Native macOS settings panel: one-click install checks, voice auditions, pool curation, lexicon editing.</p>
-      </div>
-      <div class="feat">
-        <span class="feat-icon">🔇</span>
-        <h3>Echo suppression</h3>
-        <p>Talk while the agent is speaking and the speech lock prevents your voice from feeding back as input.</p>
+      <div class="btns">
+        <button class="btn-a">github.com/ashrocket/squawk</button>
+        <button class="btn-b">./setup.sh</button>
       </div>
     </div>
   </div>
-</div>
 
-<div class="section section-soft">
-  <div class="wrap">
-    <h2>How it works</h2>
-    <p class="section-lead" style="margin-bottom: 2rem;">whisper.cpp listens, Claude thinks, your chosen voice speaks. One clean pipeline.</p>
-    <pre class="diagram"><code>mic ──▶ voice detection ──▶ whisper.cpp (Metal) ──▶ claude -p --resume
-                                                          │
-speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀───┘</code></pre>
-  </div>
-</div>
-
-<div class="section section-white">
-  <div class="wrap">
-    <h2>See it work</h2>
-    <p class="section-lead" style="margin-bottom: 2rem;">Built in public, moving fast.</p>
-    <!-- VIDEOS -->
-    <!-- VIDEOS: drop <video> or YouTube <iframe> embeds here -->
-    <div class="videos">
-      Demo videos coming very soon.<br>
-      Watch the <a href="https://github.com/ashrocket/squawk">repo</a> in the meantime.
+  <!-- ── SLIDE 10: Raycast / Arc Dark ── -->
+  <div class="slide s10">
+    <div class="glow"></div>
+    <div class="logo-row">
+      <div class="mark">
+        <svg viewBox="0 0 26 26" width="24" height="24" fill="none">
+          <path d="M13 3C8.6 3 5 6.6 5 11c0 3.3 1.9 6.1 4.7 7.5L9 22h8l-.7-3.5C19.1 17.1 21 14.3 21 11c0-4.4-3.6-8-8-8z" fill="rgba(255,255,255,0.9)"/>
+          <circle cx="10.5" cy="10.5" r="1" fill="#1C1C1E"/>
+          <circle cx="15.5" cy="10.5" r="1" fill="#1C1C1E"/>
+        </svg>
+      </div>
+      <span class="wm">squawk</span>
+    </div>
+    <h1>Give your Mac a voice.</h1>
+    <p class="tl">Every agent. Every tab. One channel. Radio-operator rules — they never talk over each other.</p>
+    <div class="spotlight">
+      <span class="kbd">⌘K</span>
+      <span>speak to claude...</span>
+    </div>
+    <div class="btns">
+      <button class="btn-a">Get squawk free</button>
+      <button class="btn-b">View on GitHub</button>
     </div>
   </div>
+
+</div><!-- /reel -->
+
+<!-- dots -->
+<div class="dots" id="dots">
+  <div class="dot active" onclick="go(0)"></div>
+  <div class="dot" onclick="go(1)"></div>
+  <div class="dot" onclick="go(2)"></div>
+  <div class="dot" onclick="go(3)"></div>
+  <div class="dot" onclick="go(4)"></div>
+  <div class="dot" onclick="go(5)"></div>
+  <div class="dot" onclick="go(6)"></div>
+  <div class="dot" onclick="go(7)"></div>
+  <div class="dot" onclick="go(8)"></div>
+  <div class="dot" onclick="go(9)"></div>
 </div>
 
-<footer>
-  <div>MIT © Ashley Raiteri · built in public</div>
-  <div><a href="https://github.com/ashrocket/squawk">github.com/ashrocket/squawk</a></div>
-</footer>
+<!-- arrows -->
+<button class="arr left" id="arrL" onclick="step(-1)">‹</button>
+<button class="arr right" id="arrR" onclick="step(1)">›</button>
 
+<!-- vote bar -->
+<div id="vote-bar">
+  <span id="vb-name">Stripe Dark</span>
+  <span id="vb-sep">·</span>
+  <span id="vb-count"></span>
+  <button id="vb-btn">Vote for this</button>
+</div>
+
+<script>
+const TOTAL = 10;
+const NAMES = [
+  'Stripe Dark','Mailchimp Cream','Notion Minimal','Twilio Developer',
+  'Segment Dark','Deep Navy','Intercom White','Linear Modern',
+  'Vercel Mono','Raycast Dark'
+];
+// slides with light backgrounds — need dark UI chrome
+const LIGHT = new Set([1, 2, 6]); // Mailchimp, Notion, Intercom White (0-indexed)
+
+let cur = 0;
+let user = null;
+let myVote = null;
+let counts = new Array(TOTAL).fill(null); // null = loading
+
+const reel   = document.getElementById('reel');
+const dots   = document.querySelectorAll('.dot');
+const arrL   = document.getElementById('arrL');
+const arrR   = document.getElementById('arrR');
+const vbName = document.getElementById('vb-name');
+const vbSep  = document.getElementById('vb-sep');
+const vbCnt  = document.getElementById('vb-count');
+const vbBtn  = document.getElementById('vb-btn');
+const authBar  = document.getElementById('auth-bar');
+const counterEl = document.getElementById('counter');
+
+// ── NAVIGATION (with wraparound) ──────────────────────────────
+function go(n) {
+  const prev = cur;
+  cur = ((n % TOTAL) + TOTAL) % TOTAL;
+  const wrapped = n < 0 || n >= TOTAL;
+  if (wrapped) {
+    // instant scroll for wrap-around edges so we don't fly across all slides
+    reel.style.scrollBehavior = 'auto';
+    reel.scrollLeft = cur * window.innerWidth;
+    requestAnimationFrame(() => reel.style.removeProperty('scroll-behavior'));
+  } else {
+    reel.scrollTo({ left: cur * window.innerWidth, behavior: 'smooth' });
+  }
+  update();
+}
+
+function step(d) { go(cur + d); }
+
+function update() {
+  const isLight = LIGHT.has(cur);
+
+  // Dots
+  dots.forEach((d, i) => {
+    d.classList.toggle('active', i === cur);
+    d.classList.toggle('dark', isLight);
+  });
+
+  // Arrows — no dimming; it wraps now
+  arrL.className = 'arr left' + (isLight ? ' dk' : '');
+  arrR.className = 'arr right' + (isLight ? ' dk' : '');
+
+  // Counter
+  counterEl.textContent = `${cur + 1} / ${TOTAL}`;
+  counterEl.className = isLight ? 'dk' : '';
+
+  // Vote bar content
+  vbName.textContent = NAMES[cur];
+
+  const c = counts[cur];
+  if (c === null) {
+    vbCnt.textContent = '…';
+  } else {
+    vbCnt.textContent = c === 0 ? '' : `${c} vote${c !== 1 ? 's' : ''}`;
+  }
+
+  // Hide sep if no count shown
+  vbSep.style.display = (c === null || c > 0) ? '' : 'none';
+
+  // Vote button state
+  vbBtn.disabled = false;
+  if (!user) {
+    vbBtn.textContent = 'Login with GitHub to vote';
+    vbBtn.className = '';
+  } else if (myVote === cur) {
+    vbBtn.textContent = '✓ Your pick';
+    vbBtn.className = 'voted';
+  } else {
+    vbBtn.textContent = myVote === null ? 'Vote for this' : 'Switch vote here';
+    vbBtn.className = '';
+  }
+}
+
+reel.addEventListener('scroll', () => {
+  const n = Math.round(reel.scrollLeft / window.innerWidth);
+  if (n !== cur && n >= 0 && n < TOTAL) { cur = n; update(); }
+}, { passive: true });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') step(1);
+  if (e.key === 'ArrowLeft') step(-1);
+});
+
+// ── VOTING ────────────────────────────────────────────────────
+vbBtn.addEventListener('click', () => {
+  if (!user) { window.location.href = '/api/auth/github'; return; }
+  if (myVote === cur) return;
+  castVote(cur);
+});
+
+async function castVote(slide) {
+  vbBtn.disabled = true;
+  vbBtn.textContent = '…';
+
+  const res = await fetch('/api/vote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slide }),
+  }).catch(() => null);
+
+  if (!res) { vbBtn.disabled = false; update(); return; }
+  if (res.status === 401) { window.location.href = '/api/auth/github'; return; }
+
+  if (res.ok) {
+    const data = await res.json();
+    myVote = data.slide;
+    counts = data.counts;
+  }
+  vbBtn.disabled = false;
+  update();
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+function renderAuth() {
+  if (!user) {
+    authBar.innerHTML = `<a class="auth-link" href="/api/auth/github">Login with GitHub to vote</a>`;
+    return;
+  }
+  authBar.innerHTML = `
+    <img class="auth-avatar" src="${escHtml(user.avatar)}" alt="${escHtml(user.login)}">
+    <span class="auth-name">${escHtml(user.name || user.login)}</span>
+    <button class="auth-logout" id="logout-btn">sign out</button>
+  `;
+  document.getElementById('logout-btn').addEventListener('click', logout);
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+  user = null; myVote = null;
+  renderAuth(); update();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+async function init() {
+  update(); // render initial state immediately
+
+  const [meData, votesData] = await Promise.all([
+    fetch('/api/me').then(r => r.json()).catch(() => ({ user: null, vote: null })),
+    fetch('/api/votes').then(r => r.json()).catch(() => ({ counts: new Array(TOTAL).fill(0) })),
+  ]);
+
+  user    = meData.user;
+  myVote  = meData.vote;
+  counts  = votesData.counts || new Array(TOTAL).fill(0);
+
+  renderAuth();
+  update();
+}
+
+init();
+</script>
 </body>
 </html>

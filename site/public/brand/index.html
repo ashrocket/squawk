@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>squawk — 6 brand directions</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+
+  .slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+  }
+  .tag {
+    position: absolute; top: 1rem; left: 0; right: 0;
+    font-size: 0.66rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .logo-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 2rem; }
+  .btns { margin-top: 1.8rem; display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
+  .btns button { cursor: pointer; font-size: 0.85rem; }
+  .foot { margin-top: 1.5rem; font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  /* 1 — STRIPE DARK */
+  .s1 { background: #32325d; color: #fff; }
+  .s1 .tag { color: rgba(255,255,255,0.4); }
+  .s1 .mk { width: 46px; height: 46px; background: #6772e5; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .s1 .wm { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.02em; }
+  .s1 h1 { font-size: 2.5rem; font-weight: 300; letter-spacing: -0.02em; line-height: 1.1; }
+  .s1 h1 strong { font-weight: 700; }
+  .s1 .tl { margin-top: 0.9rem; font-size: 1rem; color: rgba(255,255,255,0.62); max-width: 420px; }
+  .s1 .btn-a { padding: 0.75rem 1.7rem; border-radius: 4px; background: #6772e5; color: #fff; font-weight: 600; border: none; }
+  .s1 .btn-b { padding: 0.75rem 1.7rem; border-radius: 4px; border: 1.5px solid rgba(255,255,255,0.4); color: #fff; background: transparent; }
+  .s1 .foot { color: rgba(255,255,255,0.3); }
+
+  /* 2 — MAILCHIMP CREAM */
+  .s2 { background: #fffde7; color: #241c15; }
+  .s2 .tag { color: rgba(36,28,21,0.35); }
+  .s2 .mk { width: 60px; height: 60px; background: #ffe01b; border-radius: 50%; border: 3px solid #241c15; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; }
+  .s2 .wm { font-size: 1.3rem; font-weight: 900; letter-spacing: 0.05em; }
+  .s2 h1 { font-family: Georgia, serif; font-style: italic; font-size: 2.6rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+  .s2 .tl { margin-top: 0.9rem; font-size: 0.98rem; color: #5c5040; max-width: 400px; }
+  .s2 .btn-a { padding: 0.8rem 1.8rem; background: #241c15; color: #ffe01b; font-weight: 700; border: none; text-transform: uppercase; letter-spacing: 0.04em; }
+  .s2 .btn-b { padding: 0.8rem 1.8rem; border: 2px solid #241c15; color: #241c15; font-weight: 700; background: transparent; text-transform: uppercase; letter-spacing: 0.04em; }
+  .s2 .foot { color: #9c8570; }
+
+  /* 3 — NOTION MINIMAL */
+  .s3 { background: #fff; color: #111; }
+  .s3 .tag { color: rgba(0,0,0,0.25); }
+  .s3 .mk { width: 38px; height: 38px; border: 2px solid #111; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .s3 .wm { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .s3 h1 { font-family: Georgia, serif; font-size: 2.9rem; font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; }
+  .s3 .tl { margin-top: 1rem; font-size: 0.95rem; color: #555; max-width: 380px; line-height: 1.6; }
+  .s3 hr { width: 36px; border: none; border-top: 1.5px solid #ddd; margin: 1.4rem auto; }
+  .s3 .btn-a { padding: 0.7rem 1.6rem; background: #111; color: #fff; font-weight: 600; border: none; }
+  .s3 .btn-b { padding: 0.7rem 1.6rem; border: 1px solid #ddd; color: #555; background: transparent; }
+  .s3 .foot { color: #bbb; }
+
+  /* 4 — TWILIO RED */
+  .s4 { background: #f22f46; color: #fff; }
+  .s4 .tag { color: rgba(255,255,255,0.4); }
+  .s4 .mk { width: 50px; height: 50px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: "SF Mono", Menlo, monospace; font-size: 1.1rem; font-weight: 900; color: #f22f46; }
+  .s4 .wm { font-size: 1.2rem; font-weight: 900; }
+  .s4 h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.025em; }
+  .s4 .code { margin-top: 1.3rem; background: rgba(0,0,0,0.22); border-radius: 4px; padding: 0.65rem 1rem; font-family: "SF Mono", Menlo, monospace; font-size: 0.72rem; word-break: break-all; max-width: 90%; }
+  .s4 .tl { margin-top: 0.9rem; font-size: 0.92rem; color: rgba(255,255,255,0.75); max-width: 400px; }
+  .s4 .btn-a { padding: 0.75rem 1.7rem; border-radius: 3px; background: #fff; color: #f22f46; font-weight: 800; border: none; }
+  .s4 .btn-b { padding: 0.75rem 1.7rem; border-radius: 3px; border: 2px solid rgba(255,255,255,0.55); color: #fff; font-weight: 700; background: transparent; }
+
+  /* 5 — SEGMENT DARK */
+  .s5 { background: #131415; color: #fff; }
+  .s5 .tag { color: rgba(255,255,255,0.25); }
+  .s5 .mk { display: flex; align-items: flex-end; gap: 4px; height: 30px; }
+  .s5 .bar { width: 7px; background: #52bd94; border-radius: 2px; }
+  .s5 .wm { font-size: 1.15rem; font-weight: 700; }
+  .s5 h1 { font-size: 2.4rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; color: #f5f5f5; }
+  .s5 h1 em { color: #52bd94; font-style: normal; }
+  .s5 .tl { margin-top: 0.9rem; font-size: 0.92rem; color: #888; max-width: 400px; line-height: 1.6; }
+  .s5 .pills { margin-top: 1.2rem; display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+  .s5 .pill { padding: 0.28rem 0.7rem; border-radius: 100px; background: #1e2020; border: 1px solid #2d2f2f; font-size: 0.72rem; color: #888; }
+  .s5 .btn-a { padding: 0.75rem 1.7rem; border-radius: 4px; background: #52bd94; color: #000; font-weight: 700; border: none; }
+  .s5 .btn-b { padding: 0.75rem 1.7rem; border-radius: 4px; border: 1px solid #2d2f2f; color: #ccc; background: transparent; }
+
+  /* 6 — SLACK PLUM */
+  .s6 { background: #3f0f3f; color: #fff; }
+  .s6 .tag { color: rgba(255,255,255,0.3); }
+  .s6 .mk { display: flex; gap: 3px; }
+  .s6 .sq { width: 16px; height: 16px; border-radius: 5px; }
+  .s6 .wm { font-size: 1.15rem; font-weight: 700; }
+  .s6 h1 { font-size: 2.5rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; }
+  .s6 .tl { margin-top: 0.9rem; font-size: 0.98rem; color: rgba(255,255,255,0.68); max-width: 420px; line-height: 1.6; }
+  .s6 .arow { margin-top: 1.3rem; display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+  .s6 .agent { display: flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.75rem; border-radius: 100px; background: rgba(255,255,255,0.1); font-size: 0.74rem; color: rgba(255,255,255,0.85); }
+  .s6 .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .s6 .btn-a { padding: 0.75rem 1.7rem; border-radius: 4px; background: #fff; color: #3f0f3f; font-weight: 700; border: none; }
+  .s6 .btn-b { padding: 0.75rem 1.7rem; border-radius: 4px; border: 1.5px solid rgba(255,255,255,0.4); color: #fff; background: transparent; }
+
+  .hint {
+    position: fixed; bottom: 0.7rem; left: 50%; transform: translateX(-50%);
+    font-size: 0.7rem; color: rgba(128,128,128,0.7);
+    background: rgba(255,255,255,0.85); padding: 0.3rem 0.8rem; border-radius: 100px;
+    pointer-events: none; z-index: 50;
+  }
+</style>
+</head>
+<body>
+
+<!-- 1 STRIPE -->
+<section class="slide s1">
+  <div class="tag">1 / 6 · Stripe Dark</div>
+  <div class="logo-row">
+    <div class="mk">
+      <svg viewBox="0 0 28 28" width="26" height="26" fill="none">
+        <rect x="4" y="8" width="20" height="3" rx="1.5" fill="#fff"/>
+        <rect x="4" y="13" width="13" height="3" rx="1.5" fill="#fff"/>
+        <rect x="19" y="13" width="3" height="3" rx="1" fill="#a5b4fc"/>
+        <rect x="23" y="13" width="2" height="3" rx="1" fill="#a5b4fc"/>
+        <rect x="4" y="18" width="8" height="3" rx="1.5" fill="rgba(255,255,255,0.35)"/>
+      </svg>
+    </div>
+    <span class="wm">squawk</span>
+  </div>
+  <h1>Voice as <strong>infrastructure</strong>.</h1>
+  <p class="tl">Every Claude Code agent speaks with a distinct voice — one channel, radio-operator rules, entirely on your Mac.</p>
+  <div class="btns"><button class="btn-a">View on GitHub</button><button class="btn-b">Quick start →</button></div>
+  <div class="foot">Free &amp; open source · MIT · macOS</div>
+</section>
+
+<!-- 2 MAILCHIMP -->
+<section class="slide s2">
+  <div class="tag">2 / 6 · Mailchimp Cream</div>
+  <div class="logo-row">
+    <div class="mk">📡</div>
+    <span class="wm">SQUAWK</span>
+  </div>
+  <h1>Your agents now<br>have a voice.</h1>
+  <p class="tl">whisper.cpp on Metal listens. Kokoro and Apple neural voices speak. Every Claude agent gets its own character.</p>
+  <div class="btns"><button class="btn-a">Get Started Free</button><button class="btn-b">Read the Docs</button></div>
+  <div class="foot">MIT · Nothing leaves your Mac</div>
+</section>
+
+<!-- 3 NOTION -->
+<section class="slide s3">
+  <div class="tag">3 / 6 · Notion Minimal</div>
+  <div class="logo-row">
+    <div class="mk">
+      <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
+        <rect x="3" y="5" width="14" height="2" rx="1" fill="#111"/>
+        <rect x="3" y="9" width="10" height="2" rx="1" fill="#111"/>
+        <rect x="3" y="13" width="6" height="2" rx="1" fill="#111"/>
+        <rect x="14" y="9" width="2" height="7" rx="1" fill="#111"/>
+      </svg>
+    </div>
+    <span class="wm">squawk</span>
+  </div>
+  <h1>Voices for the<br>agents building<br>your code.</h1>
+  <p class="tl">A local voice layer for Claude Code. One audio channel. Radio-operator coordination. Every agent speaks differently.</p>
+  <hr>
+  <div class="btns"><button class="btn-a">View on GitHub</button><button class="btn-b">Quick start</button></div>
+  <div class="foot">Free &amp; open source · macOS</div>
+</section>
+
+<!-- 4 TWILIO -->
+<section class="slide s4">
+  <div class="tag">4 / 6 · Twilio Red</div>
+  <div class="logo-row">
+    <div class="mk">sq</div>
+    <span class="wm">squawk</span>
+  </div>
+  <h1>Add voice to your<br>Claude agents<br>in 3 lines.</h1>
+  <div class="code">git clone …/squawk &amp;&amp; ./setup.sh &amp;&amp; ./voice</div>
+  <p class="tl">whisper.cpp Metal STT · Kokoro + Apple TTS · Radio-operator rules. Fully local.</p>
+  <div class="btns"><button class="btn-a">Get the code</button><button class="btn-b">View docs</button></div>
+</section>
+
+<!-- 5 SEGMENT -->
+<section class="slide s5">
+  <div class="tag">5 / 6 · Segment Dark</div>
+  <div class="logo-row">
+    <div class="mk">
+      <div class="bar" style="height:16px;"></div>
+      <div class="bar" style="height:24px;"></div>
+      <div class="bar" style="height:20px;"></div>
+      <div class="bar" style="height:28px;"></div>
+      <div class="bar" style="height:16px;"></div>
+    </div>
+    <span class="wm">squawk</span>
+  </div>
+  <h1>One <em>voice channel</em><br>for all your agents.</h1>
+  <p class="tl">Local speech recognition and synthesis for Claude Code. Agents coordinate — one talks, the rest stand by.</p>
+  <div class="pills">
+    <span class="pill">whisper.cpp Metal</span>
+    <span class="pill">Kokoro TTS</span>
+    <span class="pill">Apple Neural</span>
+    <span class="pill">radio protocol</span>
+  </div>
+  <div class="btns"><button class="btn-a">Get started free</button><button class="btn-b">GitHub →</button></div>
+</section>
+
+<!-- 6 SLACK -->
+<section class="slide s6">
+  <div class="tag">6 / 6 · Slack Plum</div>
+  <div class="logo-row">
+    <div class="mk">
+      <div class="sq" style="background:#e8a838;"></div>
+      <div class="sq" style="background:#2eb67d;"></div>
+      <div class="sq" style="background:#36c5f0;"></div>
+      <div class="sq" style="background:#e01e5a;"></div>
+    </div>
+    <span class="wm">squawk</span>
+  </div>
+  <h1>Every agent has<br>something to say.</h1>
+  <p class="tl">Give your Claude Code agents real voices. One mic, one channel — radio-operator rules so they never talk over each other.</p>
+  <div class="arow">
+    <div class="agent"><div class="dot" style="background:#e8a838;"></div>scout thinking…</div>
+    <div class="agent"><div class="dot" style="background:#2eb67d;"></div>assistant speaking</div>
+    <div class="agent"><div class="dot" style="background:#36c5f0;"></div>builder on hold</div>
+  </div>
+  <div class="btns"><button class="btn-a">Get squawk free</button><button class="btn-b">View on GitHub</button></div>
+</section>
+
+<div class="hint">↓ scroll through all 6 · reply with your pick</div>
+
+</body>
+</html>

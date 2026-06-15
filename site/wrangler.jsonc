@@ -1,9 +1,15 @@
 {
   "name": "squawk-site",
+  "account_id": "ce40c57a207aaaa76ae172d63447828d",
+  "main": "./src/index.js",
   "compatibility_date": "2026-06-01",
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "binding": "ASSETS"
   },
+  "kv_namespaces": [
+    { "binding": "KV", "id": "96f712a0c6244133b4a289a1d1f44742" }
+  ],
   "routes": [
     { "pattern": "squawk.raiteri.net", "custom_domain": true }
   ]
