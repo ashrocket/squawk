@@ -262,7 +262,7 @@ def main():
     ap.add_argument("--rate", type=int, default=None, help="speech rate wpm")
     ap.add_argument("--voice", default=None, help="override the assigned voice")
     ap.add_argument("--announce", action="store_true",
-                    help="prefix speech with the agent's name")
+                    help="opt in to prefixing speech with the agent's name")
     ap.add_argument("--teach", action="append", metavar="WORD=PHONETIC",
                     help='fix a pronunciation, e.g. --teach "cmux=sea mux"')
     ap.add_argument("--relay", action="store_true",

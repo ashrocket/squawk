@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "squawk",
+  "version": "0.2.0",
+  "description": "Audible Claude Code status updates through Squawk, including an opt-in session mode.",
+  "author": {
+    "name": "ashrocket"
+  },
+  "repository": "https://github.com/ashrocket/squawk"
+}

@@ -11,3 +11,4 @@ pool.json
 app/Squawk.iconset/
 app/Icon.icns
 site/.wrangler/
+claude-plugin/.local.env

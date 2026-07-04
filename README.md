@@ -55,7 +55,47 @@ them. Click into a window to talk to that project's agent.
 Let any agent (any cmux tab, any script) report in:
 
 ```bash
-./speak --as builder --announce "Tests pass, deploy is live."
+./speak --as builder "Tests pass, deploy is live."
+```
+
+## Claude Code Squawk Mode
+
+Install the Claude Code plugin once:
+
+```bash
+./claude-plugin/install.sh
+```
+
+If Claude Code is already open, reload plugins:
+
+```text
+/reload-plugins
+```
+
+Then opt a Claude session into audible updates:
+
+```text
+/squawk-mode
+```
+
+Squawk Mode announces the start of substantial work, meaningful blockers,
+verification results, and completion. It is session-scoped and intentionally
+quiet about routine file reads or small internal steps. Turn it off with:
+
+```text
+/squawk-off
+```
+
+For one-off speech from Claude Code:
+
+```text
+/squawk-say Build is green.
+```
+
+You can also load the plugin without installing it:
+
+```bash
+claude --plugin-dir /path/to/squawk/claude-plugin
 ```
 
 ## Squawk.app — installer & settings panel
@@ -121,6 +161,7 @@ macOS (Apple Silicon recommended), Homebrew, Python 3.10+, Claude Code CLI.
 - [x] Barge-in v1 (experimental; bleed-aware thresholding, no echo cancellation yet)
 - [x] STT-side pronunciation learning (recognize taught words in *your* speech)
 - [x] Kokoro daemon: model stays resident, spawned on demand, exits after 10 idle minutes
+- [x] Claude Code Squawk Mode plugin: session-scoped audible status updates
 - [ ] Talk to your *current* Claude Code session, not a fresh one
 - [ ] Wake word / push-to-talk modes
 - [ ] Demo video

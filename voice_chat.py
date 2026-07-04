@@ -339,8 +339,7 @@ def main():
         args.agent = "assistant" if cwd == HERE else cwd.name
     system_prompt = VOICE_SYSTEM_PROMPT_TEMPLATE.format(
         agent=args.agent, user=args.user, cwd=cwd)
-    greeting = args.greeting or (
-        f"{args.agent} here, on voice. I'm listening while this window has your attention.")
+    greeting = args.greeting or "I'm listening while this window has your attention."
 
     logs_dir = HERE / "logs"
     logs_dir.mkdir(exist_ok=True)
