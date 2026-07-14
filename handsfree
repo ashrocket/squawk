@@ -1,0 +1,5 @@
+#!/bin/bash
+# Hands-free voice into your live agent session (via cmux).
+#   ~/ashcode/squawk/handsfree [once|wake|convo|listen] [options]
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$DIR/.venv/bin/python" "$DIR/handsfree.py" "$@"

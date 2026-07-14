@@ -18,10 +18,12 @@ import sys
 import time
 from pathlib import Path
 
+import channel_state as channel
+
 HERE = Path(__file__).resolve().parent
-SPEECH_LOCK = HERE / ".speech.lock"
-INBOX = HERE / "inbox"
-REGISTRY = HERE / "voices.json"
+SPEECH_LOCK = channel.SPEECH_LOCK
+INBOX = channel.INBOX
+REGISTRY = channel.REGISTRY
 REGISTRY_LOCK = HERE / ".voices.lock"
 LEXICON = HERE / "lexicon.json"
 LEXICON_LOCK = HERE / ".lexicon.lock"
@@ -203,11 +205,10 @@ def lexicon_words():
     return list(load_lexicon().keys())
 
 
-def relay(text, agent="agent"):
+def relay(text, agent="agent", kind="relay"):
     """Queue a short message for the active voice conversation to read aloud."""
-    INBOX.mkdir(exist_ok=True)
-    (INBOX / f"{time.time_ns()}-{agent}.json").write_text(
-        json.dumps({"from": agent.replace("-", " "), "text": text}))
+    voice = voice_for(agent)
+    return channel.request_airtime(text, agent=agent, voice=voice, kind=kind)
 
 
 def speak(text, agent="assistant", rate=None, voice=None, announce=False, interrupt_check=None):
@@ -231,28 +232,32 @@ def speak(text, agent="assistant", rate=None, voice=None, announce=False, interr
 
     with open(SPEECH_LOCK, "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
-        if wav:
-            cmd = ["afplay", wav]
-        else:
-            cmd = ["say"] if voice == DEFAULT_VOICE else ["say", "-v", voice]
-            if rate:
-                cmd += ["-r", str(rate)]
-            cmd.append(text)
-        proc = subprocess.Popen(cmd)
-        completed = True
-        if interrupt_check is None:
-            proc.wait()
-        else:
-            while proc.poll() is None:
-                if interrupt_check():
-                    proc.terminate()
-                    completed = False
-                    break
-                time.sleep(0.08)
-            proc.wait()
-        if wav:
-            Path(wav).unlink(missing_ok=True)
-        return completed
+        channel.set_transmission(agent=agent, voice=voice, text=text)
+        try:
+            if wav:
+                cmd = ["afplay", wav]
+            else:
+                cmd = ["say"] if voice == DEFAULT_VOICE else ["say", "-v", voice]
+                if rate:
+                    cmd += ["-r", str(rate)]
+                cmd.append(text)
+            proc = subprocess.Popen(cmd)
+            completed = True
+            if interrupt_check is None:
+                proc.wait()
+            else:
+                while proc.poll() is None:
+                    if interrupt_check():
+                        proc.terminate()
+                        completed = False
+                        break
+                    time.sleep(0.08)
+                proc.wait()
+            return completed
+        finally:
+            channel.clear_transmission(agent=agent)
+            if wav:
+                Path(wav).unlink(missing_ok=True)
 
 
 def main():
@@ -268,8 +273,22 @@ def main():
     ap.add_argument("--relay", action="store_true",
                     help="don't speak now; queue the message for the active voice "
                          "conversation to read aloud between turns")
+    ap.add_argument("--request", action="store_true",
+                    help="request airtime on the shared channel instead of speaking now")
+    ap.add_argument("--status", action="store_true",
+                    help="show the shared Squawk channel, agents, voices, and queue")
+    ap.add_argument("--json", action="store_true",
+                    help="with --status, emit machine-readable JSON")
     ap.add_argument("text", nargs="*", help="text to speak (or pipe via stdin)")
     args = ap.parse_args()
+
+    if args.status:
+        status = channel.snapshot(available_voices=build_pool())
+        if args.json:
+            print(json.dumps(status, indent=2, sort_keys=True))
+        else:
+            print(channel.format_snapshot(status))
+        return
 
     for pair in args.teach or []:
         word, _, phonetic = pair.partition("=")
@@ -280,9 +299,10 @@ def main():
     text = text.strip()
     if not text:
         sys.exit(0)
-    if args.relay:
-        relay(text, agent=args.agent)
-        print("queued for relay (delivered when a voice conversation is active)")
+    if args.relay or args.request:
+        request = relay(text, agent=args.agent,
+                        kind="request" if args.request else "relay")
+        print(f"queued for channel ({request['id']})")
         return
     speak(text, agent=args.agent, rate=args.rate, voice=args.voice, announce=args.announce)
 

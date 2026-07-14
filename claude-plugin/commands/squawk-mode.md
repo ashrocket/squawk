@@ -5,6 +5,9 @@ arguments:
   - name: agent
     description: Optional voice identity to use for this Claude session.
     required: false
+  - name: submode
+    description: Optional short mode label such as summarizing or listening.
+    required: false
 ---
 
 Enable Squawk Mode for this Claude Code session.
@@ -22,8 +25,11 @@ Then follow these rules for the rest of the session:
 - Do not speak for routine file reads, every command, or minor internal steps.
 - Keep each spoken update under about 180 characters.
 - Use the same agent identity selected by `squawk-mode.sh`.
+- The script handles the audible confirmation. Do not add a separate spoken
+  intro or explanation.
+- If the script reports `intro=repeat`, keep any chat confirmation terse:
+  `Squawk mode on - <submode>`.
 - When work is complete, the Squawk Stop hook may ask you to announce the final
   summary before stopping. Run that command once, then stop normally.
 
-Report that Squawk Mode is enabled and include the agent name printed by the
-script.
+Report the mode and submode only. Keep it short.

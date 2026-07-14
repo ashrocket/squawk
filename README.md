@@ -58,6 +58,37 @@ Let any agent (any cmux tab, any script) report in:
 ./speak --as builder "Tests pass, deploy is live."
 ```
 
+Inspect the shared channel before talking:
+
+```bash
+./speak --status
+./speak --status --json
+```
+
+Squawk publishes a machine-readable channel state: the current floor holder
+(the active conversation that owns the channel), the current transmission, known
+agents, assigned voices, enabled Squawk-mode sessions, and queued airtime
+requests. If another conversation has the floor, queue a request instead of
+interrupting it:
+
+```bash
+./speak --request --as builder "I have test results when the channel is free."
+```
+
+Speak into the live cmux agent you are already using:
+
+```bash
+./handsfree listen                 # continuous dictation into the focused agent
+./handsfree convo                  # wake once, then stay open until "that's all"
+./handsfree once                   # capture one utterance and submit it
+```
+
+`handsfree` injects only into known cmux agent panes by default
+(`claude` or `codex`). Use `--surface <id-or-ref>` to pin a target instead of
+following focus, or `--any-pane` when you intentionally want to type into a
+non-agent pane. From a sandboxed Codex tool call, cmux socket access may be
+blocked; run it from a normal cmux terminal or approve an unsandboxed run.
+
 ## Claude Code Squawk Mode
 
 Install the Claude Code plugin once:
@@ -142,6 +173,8 @@ speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀─�
   any agent holds the speech lock.
 - `speak.py` — the shared voice box: speech lock, voice registry, pronunciation
   lexicon, Kokoro synthesis. Also a CLI.
+- `channel_state.py` — the shared radio state: floor holder, current
+  transmission, known agents, voices, Squawk-mode sessions, and airtime queue.
 - The brain is `claude -p` with session resume — conversation continuity with
   whatever model you choose (`--model sonnet` for smarter, slower replies).
 
@@ -162,8 +195,8 @@ macOS (Apple Silicon recommended), Homebrew, Python 3.10+, Claude Code CLI.
 - [x] STT-side pronunciation learning (recognize taught words in *your* speech)
 - [x] Kokoro daemon: model stays resident, spawned on demand, exits after 10 idle minutes
 - [x] Claude Code Squawk Mode plugin: session-scoped audible status updates
-- [ ] Talk to your *current* Claude Code session, not a fresh one
-- [ ] Wake word / push-to-talk modes
+- [x] Talk to your *current* cmux Claude/Codex agent session, not a fresh one
+- [x] Wake-word-gated handsfree input mode
 - [ ] Demo video
 
 MIT © Ashley Raiteri

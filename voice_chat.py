@@ -26,8 +26,9 @@ from pathlib import Path
 import numpy as np
 import sounddevice as sd
 
+import channel_state as channel
 from speak import (INBOX, SPEECH_LOCK, lexicon_words, reverse_lexicon,
-                   speak as speak_serialized, teach)
+                   speak as speak_serialized, teach, voice_for)
 
 SAMPLE_RATE = 16000
 FRAME_MS = 30
@@ -337,6 +338,7 @@ def main():
     cwd = Path.cwd()
     if args.agent is None:
         args.agent = "assistant" if cwd == HERE else cwd.name
+    channel_voice = args.voice or voice_for(args.agent)
     system_prompt = VOICE_SYSTEM_PROMPT_TEMPLATE.format(
         agent=args.agent, user=args.user, cwd=cwd)
     greeting = args.greeting or "I'm listening while this window has your attention."
@@ -371,6 +373,9 @@ def main():
 
             if should_hold and not mic.held:
                 if mic.try_acquire():
+                    channel.set_floor(agent=args.agent, voice=channel_voice,
+                                      project=str(cwd), mode="conversation",
+                                      detail="listening")
                     log_line(log_file, "system", "* listening (window focused)")
                     if not greeted:
                         greeted = True
@@ -380,6 +385,7 @@ def main():
                     continue
             elif not should_hold and mic.held:
                 mic.release()
+                channel.clear_floor(agent=args.agent)
                 log_line(log_file, "system", "- standing by (window unfocused)")
 
             if not mic.held:
@@ -433,6 +439,7 @@ def main():
         log_line(log_file, "system", "interrupted, exiting")
     finally:
         mic.release()
+        channel.clear_floor(agent=args.agent)
         focus.restore()
 
 

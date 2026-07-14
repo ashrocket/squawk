@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "squawk",
+  "description": "Voices for Claude Code agents on macOS",
+  "owner": {
+    "name": "ashrocket"
+  },
+  "plugins": [
+    {
+      "name": "squawk",
+      "description": "Audible Claude Code status updates through Squawk, including an opt-in session mode.",
+      "version": "0.2.0",
+      "source": "./claude-plugin",
+      "category": "productivity",
+      "homepage": "https://github.com/ashrocket/squawk"
+    }
+  ]
+}

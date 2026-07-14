@@ -6,8 +6,10 @@ description: Speak to the user aloud through Squawk. Use when asked to say somet
 # Squawk
 
 Squawk gives Claude Code an audible voice through the local Squawk repo. Speech
-is serialized by Squawk's global lock, so commands may block briefly until the
-audio channel is free.
+is serialized by Squawk's global lock and coordinated through a shared channel
+state. The channel state exposes the current floor holder, current transmission,
+known agents, assigned voices, enabled Squawk-mode sessions, and queued airtime
+requests.
 
 Use the helper script from this plugin instead of calling `speak` directly:
 
@@ -33,13 +35,34 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/squawk-speak.sh" --as <agent-name> "<short s
   the spoken identity is more useful than the extra words.
 - Keep spoken updates short. Prefer one useful sentence over narration.
 
+## Channel Status
+
+Before speaking during a live voice workflow, inspect the shared channel:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/squawk-speak.sh" --status --json
+```
+
+- `floor` means an active conversation owns the channel between turns.
+- `transmission` means audio is currently playing.
+- `requests` are agents waiting for airtime.
+- If another agent has the floor, do not speak directly unless the user
+  explicitly asks you to interrupt.
+
 ## Relay
 
 If the user may be in an active voice conversation and asks you not to interrupt
-it, queue the message instead:
+it, or if `--status --json` shows another floor holder, queue the message
+instead:
 
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/squawk-speak.sh" --relay --as <agent-name> "<message>"
+```
+
+For an explicit airtime request, use:
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/squawk-speak.sh" --request --as <agent-name> "<message>"
 ```
 
 ## Teach Pronunciations

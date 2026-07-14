@@ -12,7 +12,7 @@ brew list whisper-cpp >/dev/null 2>&1 || brew install whisper-cpp
 
 echo "==> Python environment"
 python3 -m venv .venv
-.venv/bin/pip install --quiet sounddevice numpy
+.venv/bin/pip install --quiet sounddevice numpy openwakeword
 
 echo "==> Whisper model (base.en, ~142MB)"
 mkdir -p models logs
@@ -28,9 +28,10 @@ if [[ "$kokoro" =~ ^[Yy] ]]; then
     https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
 fi
 
-chmod +x voice speak
+chmod +x voice speak handsfree
 echo
 echo "Done. Start a conversation:   ./voice --user YourName"
+echo "Speak into a live cmux agent: ./handsfree listen"
 echo "Let an agent speak:           ./speak --as my-agent --announce \"Build finished.\""
 echo "Fix a pronunciation:          ./speak --teach \"cmux=sea mux\""
 echo "Settings app (optional):      ./app/build_app.sh && open app/Squawk.app"
