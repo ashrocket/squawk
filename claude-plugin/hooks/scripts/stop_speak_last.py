@@ -96,11 +96,11 @@ def speak(agent, text):
         except OSError:
             pass
         return
-    args = [os.path.join(SQUAWK_ROOT, "speak"), "--as", agent]
+    args = ["bash", os.path.join(os.environ.get("CLAUDE_PLUGIN_ROOT", PLUGIN_ROOT),
+                                 "scripts", "squawk-speak.sh"),
+            "--as", agent]
     if RELAY_AWARE and voice_active():
-        args.insert(1, "--relay")
-    if not os.access(args[0], os.X_OK):
-        return
+        args.insert(2, "--relay")
     try:
         proc = subprocess.Popen(args, stdin=subprocess.PIPE, text=True,
                                 start_new_session=True)
