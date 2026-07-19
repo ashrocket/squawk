@@ -181,6 +181,7 @@ struct SquawkApp: App {
         WindowGroup("Squawk") {
             if model.repo != nil {
                 TabView {
+                    ChannelView(model: model).tabItem { Label("Channel", systemImage: "dot.radiowaves.left.and.right") }
                     InstallView(model: model).tabItem { Label("Install", systemImage: "wrench.and.screwdriver") }
                     VoicesView(model: model).tabItem { Label("Voices", systemImage: "waveform") }
                     LexiconView(model: model).tabItem { Label("Lexicon", systemImage: "character.book.closed") }

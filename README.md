@@ -26,7 +26,20 @@ would recognize:
   keystrokes. (Terminal focus reporting; works in Ghostty/cmux, iTerm2, xterm.)
 - **Conversations hold the con.** An active exchange keeps the mic for 75s past
   the last turn, even if your focus drifts — nobody steals the channel mid-thought.
-- **One talker.** A global speech lock — agents queue, never talk over each other.
+- **One talker.** All speech routes through `squawkd`, a central multiplexer
+  daemon (the traffic cop): one priority queue, one voice at a time, urgent
+  messages jump the line but never interrupt mid-utterance. Every message is
+  tagged with its origin — Claude session id, terminal window, project — and
+  the voice it should use.
+- **Questions route back.** `speak --ask "Deploy to prod?"` speaks the
+  question, parks it on the channel, and blocks until you answer — in
+  Squawk.app's Channel tab or with `speak --answer latest "yes"`. The answer
+  lands on the stdout of the exact session that asked, even with five agents
+  talking.
+- **Phone fallback.** With [Pidgin](https://pidginroost.com) signed in, a
+  question still unanswered after a grace delay (10s) is forwarded to your
+  phone; reply there and it routes back the same way. First responder wins —
+  desk or phone, whichever answers first.
 - **Barge-in (experimental).** Start talking over the assistant and it stops to listen.
 - **Relay requests.** Background agents don't grab the speakers mid-conversation;
   `speak --relay "need a review on PR 12"` queues a message the active
@@ -57,6 +70,26 @@ Let any agent (any cmux tab, any script) report in:
 ```bash
 ./speak --as builder "Tests pass, deploy is live."
 ```
+
+Ask the user something and wait for the routed answer (spoken aloud, answered
+from Squawk.app or any shell):
+
+```bash
+./speak --as builder --ask "Tests are red on main. Fix forward or revert?"
+./speak --answer latest "revert"        # e.g. from another terminal
+```
+
+Fire-and-forget and priority:
+
+```bash
+./speak --as builder --no-wait "Kicking off the long build."
+./speak --as builder --priority urgent "Prod deploy failed."
+```
+
+The multiplexer daemon starts on demand with the first `speak` and exits after
+15 idle minutes. `--local` (or `SQUAWK_NO_DAEMON=1`) bypasses it and speaks
+directly behind the legacy speech lock, which the daemon also honors — the two
+paths can't talk over each other.
 
 Inspect the shared channel before talking:
 
@@ -138,6 +171,9 @@ Prefer clicking to shell scripts? Build the developer-focused mac app
 ./app/build_app.sh && open app/Squawk.app
 ```
 
+- **Channel** — live view of the multiplexer: now playing, the queue, and
+  pending questions with a reply box; answers route back to the session that
+  asked.
 - **Install** — the setup checks as live status rows, one-click install for
   anything missing (whisper.cpp, models, Python env, Kokoro).
 - **Voices** — audition every installed voice and check the ones agents may
@@ -171,8 +207,17 @@ speakers ◀── say / Kokoro ◀── lexicon ◀── speech lock ◀─�
 - `voice_chat.py` — the conversation loop (mic owner). Energy-based voice
   detection with noise-floor calibration; echo-proof: it ignores the mic while
   any agent holds the speech lock.
-- `speak.py` — the shared voice box: speech lock, voice registry, pronunciation
-  lexicon, Kokoro synthesis. Also a CLI.
+- `squawkd.py` — the multiplexer daemon (traffic cop): unix-socket JSON
+  protocol, priority queue, origin tags, question/answer routing. Spawned on
+  demand, exits when idle.
+- `pidgin_bridge.py` — the long-range radio: forwards unanswered questions to
+  your phone via pidginroost.com and posts the reply back to the daemon.
+  Spawned by squawkd when a question arrives (needs the Pidgin app's keychain
+  key or `PIDGIN_API_KEY`; `SQUAWK_NO_PIDGIN=1` disables). `--mirror` also
+  sends spoken announcements as Pidgin notes.
+- `speak.py` — the shared voice box and client: routes through `squawkd` by
+  default; voice registry, pronunciation lexicon, Kokoro synthesis, legacy
+  direct path. Also a CLI.
 - `channel_state.py` — the shared radio state: floor holder, current
   transmission, known agents, voices, Squawk-mode sessions, and airtime queue.
 - The brain is `claude -p` with session resume — conversation continuity with
@@ -197,6 +242,11 @@ macOS (Apple Silicon recommended), Homebrew, Python 3.10+, Claude Code CLI.
 - [x] Claude Code Squawk Mode plugin: session-scoped audible status updates
 - [x] Talk to your *current* cmux Claude/Codex agent session, not a fresh one
 - [x] Wake-word-gated handsfree input mode
+- [x] Multiplexer daemon: central priority queue, origin-tagged messages,
+      `--ask`/`--answer` routing, live Channel tab in Squawk.app
+- [x] Pidgin phone bridge: unanswered questions escalate to your phone,
+      replies route back to the asking session
 - [ ] Demo video
+
 
 MIT © Ashley Raiteri

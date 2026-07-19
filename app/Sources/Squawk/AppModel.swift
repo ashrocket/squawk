@@ -24,6 +24,47 @@ struct InstallStep: Identifiable {
     let manualHint: String?
 }
 
+struct ChannelItem: Identifiable, Decodable, Hashable {
+    let id: String
+    var agent: String?
+    var voice: String?
+    var session: String?
+    var source: String?
+    var project: String?
+    var priority: Int?
+    var status: String?
+    var textPreview: String?
+    var text: String?
+    var answer: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, agent, voice, session, source, project, priority, status, text, answer
+        case textPreview = "text_preview"
+    }
+
+    var origin: String {
+        [project, source, session.map { String($0.prefix(8)) }]
+            .compactMap { $0 }.joined(separator: " · ")
+    }
+}
+
+struct MuxStatus: Decodable {
+    var pid: Int?
+    var nowPlaying: ChannelItem?
+    var queue: [ChannelItem]
+    var questions: [ChannelItem]
+    var history: [ChannelItem]
+
+    enum CodingKeys: String, CodingKey {
+        case pid, queue, questions, history
+        case nowPlaying = "now_playing"
+    }
+}
+
+private struct StatusEnvelope: Decodable {
+    var multiplexer: MuxStatus?
+}
+
 final class AppModel: ObservableObject {
     @Published var repo: URL?
     @Published var voices: [Voice] = []
@@ -34,6 +75,8 @@ final class AppModel: ObservableObject {
     @Published var stepStatus: [String: Bool] = [:]
     @Published var busyStep: String?
     @Published var savedFlash = false
+    @Published var mux: MuxStatus?
+    private var channelTimer: Timer?
 
     static let kokoroVoices = ["kokoro:af_heart", "kokoro:am_michael", "kokoro:bf_emma",
                                "kokoro:bm_george", "kokoro:af_nicole", "kokoro:am_puck",
@@ -160,6 +203,41 @@ final class AppModel: ObservableObject {
         try? Self.writeJSON(lexicon, to: repo.appendingPathComponent("lexicon.json"))
         savedFlash = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { self.savedFlash = false }
+    }
+
+    // MARK: Channel (multiplexer)
+
+    func startChannelPolling() {
+        stopChannelPolling()
+        pollChannel()
+        channelTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+            self?.pollChannel()
+        }
+    }
+
+    func stopChannelPolling() {
+        channelTimer?.invalidate()
+        channelTimer = nil
+    }
+
+    func pollChannel() {
+        guard let repo else { return }
+        DispatchQueue.global(qos: .utility).async {
+            let (status, output) = Shell.run("./speak --status --json", cwd: repo)
+            let mux: MuxStatus? = status == 0
+                ? (try? JSONDecoder().decode(StatusEnvelope.self, from: Data(output.utf8)))?.multiplexer
+                : nil
+            DispatchQueue.main.async { self.mux = mux }
+        }
+    }
+
+    /// Route the user's answer back to the session that asked, via the daemon.
+    func sendAnswer(questionID: String, text: String) {
+        guard let repo else { return }
+        let command = "./speak --answer \(shellQuote(questionID)) \(shellQuote(text))"
+        Shell.runStreaming(command, cwd: repo,
+                           onLine: { [weak self] in self?.log.append($0) },
+                           onExit: { [weak self] _ in self?.pollChannel() })
     }
 
     func preview(_ voice: String) {

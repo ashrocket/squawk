@@ -6,6 +6,8 @@ inbox/
 .squawk/
 .channel.lock
 channel.json
+.squawkd.lock
+.squawkd.sock
 app/.build/
 app/Squawk.app/
 gallery/audio/
@@ -15,3 +17,4 @@ app/Squawk.iconset/
 app/Icon.icns
 site/.wrangler/
 claude-plugin/.local.env
+.pidgin_bridge.lock

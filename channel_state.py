@@ -342,4 +342,28 @@ def format_snapshot(data):
         project = f" project={mode.get('project')}" if mode.get("project") else ""
         lines.append(f"  {mode.get('agent')} session={mode.get('session')}{project}")
 
+    if "multiplexer" in data:
+        mux = data.get("multiplexer")
+        if not mux:
+            lines.append("Multiplexer: not running")
+        else:
+            lines.append(f"Multiplexer: pid={mux.get('pid')} "
+                         f"queue={len(mux.get('queue') or [])} "
+                         f"questions={len(mux.get('questions') or [])}")
+            def origin(item):
+                tags = [t for t in (item.get("project"), item.get("source"),
+                                    item.get("session")) if t]
+                return f" [{' '.join(tags)}]" if tags else ""
+            playing = mux.get("now_playing")
+            if playing:
+                lines.append(f"  playing: {playing.get('agent')} "
+                             f"({playing.get('voice')}){origin(playing)} "
+                             f"{playing.get('text_preview', '')}")
+            for item in mux.get("queue") or []:
+                lines.append(f"  queued p{item.get('priority', 0)}: {item.get('agent')}"
+                             f"{origin(item)} {item.get('text_preview', '')}")
+            for item in mux.get("questions") or []:
+                lines.append(f"  question {item.get('id')} from {item.get('agent')}"
+                             f"{origin(item)}: {item.get('text', '')}")
+
     return "\n".join(lines)

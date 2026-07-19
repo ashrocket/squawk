@@ -11,6 +11,7 @@ agent name to its own macOS voice, assigned from a pool on first use.
 import argparse
 import fcntl
 import json
+import os
 import re
 import socket
 import subprocess
@@ -149,6 +150,70 @@ def synthesize_kokoro(text, kokoro_voice):
     return _synthesize_in_process(text, kokoro_voice)
 
 
+SQUAWKD_SOCKET = HERE / ".squawkd.sock"
+PRIORITIES = {"normal": 0, "urgent": 10}
+
+
+def detect_session():
+    """The Claude Code session id, when running inside one."""
+    return os.environ.get("CLAUDE_CODE_SESSION_ID") or None
+
+
+def detect_source():
+    """Best available identifier for the terminal window this speaker runs in."""
+    explicit = os.environ.get("SQUAWK_SOURCE")
+    if explicit:
+        return explicit
+    shim = os.environ.get("CMUX_CLAUDE_WRAPPER_SHIM_ROOT")
+    if shim:
+        return f"cmux:{Path(shim).name}"
+    iterm = os.environ.get("ITERM_SESSION_ID")
+    if iterm:
+        return f"iterm:{iterm}"
+    try:
+        if sys.stdin.isatty():
+            return os.ttyname(sys.stdin.fileno())
+    except OSError:
+        pass
+    return os.environ.get("TERM_PROGRAM")
+
+
+def _squawkd_call(payload, timeout):
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    try:
+        sock.connect(str(SQUAWKD_SOCKET))
+        sock.sendall((json.dumps(payload) + "\n").encode())
+        line = sock.makefile().readline()
+    finally:
+        sock.close()
+    if not line:
+        raise RuntimeError("squawkd closed the connection")
+    return json.loads(line)
+
+
+def squawkd_call(payload, timeout=10.0, spawn=True):
+    """Send one request to the multiplexer daemon, spawning it on demand."""
+    try:
+        return _squawkd_call(payload, timeout)
+    except (OSError, RuntimeError, json.JSONDecodeError):
+        if not spawn:
+            raise
+
+    logs = HERE / "logs"
+    logs.mkdir(exist_ok=True)
+    with open(logs / "squawkd.log", "a") as out:
+        subprocess.Popen([sys.executable, str(HERE / "squawkd.py")],
+                         stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
+    deadline = time.time() + 15
+    while time.time() < deadline:
+        try:
+            return _squawkd_call(payload, timeout)
+        except (OSError, json.JSONDecodeError):
+            time.sleep(0.3)
+    raise RuntimeError("squawk multiplexer daemon did not start")
+
+
 def voice_for(agent):
     """Return the agent's assigned voice, assigning the next free one if new."""
     with open(REGISTRY_LOCK, "w") as lk:
@@ -275,6 +340,26 @@ def main():
                          "conversation to read aloud between turns")
     ap.add_argument("--request", action="store_true",
                     help="request airtime on the shared channel instead of speaking now")
+    ap.add_argument("--ask", action="store_true",
+                    help="speak a question, then block until the user answers it "
+                         "(in Squawk.app or via --answer); prints the answer")
+    ap.add_argument("--answer", metavar="ID",
+                    help="answer a pending question by id ('latest' targets the "
+                         "oldest unanswered one); the text is the answer")
+    ap.add_argument("--no-wait", action="store_true",
+                    help="queue on the multiplexer and return immediately")
+    ap.add_argument("--priority", choices=sorted(PRIORITIES), default="normal",
+                    help="urgent jumps the queue (but never interrupts mid-utterance)")
+    ap.add_argument("--timeout", type=float, default=600.0,
+                    help="seconds to wait for an answer with --ask (default 600)")
+    ap.add_argument("--local", action="store_true",
+                    help="bypass the multiplexer daemon and speak from this process")
+    ap.add_argument("--session", default=None,
+                    help="origin session tag (default: $CLAUDE_CODE_SESSION_ID)")
+    ap.add_argument("--source", default=None,
+                    help="origin terminal tag (default: auto-detected)")
+    ap.add_argument("--project", default=None,
+                    help="origin project tag (default: current directory name)")
     ap.add_argument("--status", action="store_true",
                     help="show the shared Squawk channel, agents, voices, and queue")
     ap.add_argument("--json", action="store_true",
@@ -284,6 +369,11 @@ def main():
 
     if args.status:
         status = channel.snapshot(available_voices=build_pool())
+        try:
+            status["multiplexer"] = squawkd_call(
+                {"op": "status"}, timeout=3.0, spawn=False).get("multiplexer")
+        except (OSError, RuntimeError, json.JSONDecodeError):
+            status["multiplexer"] = None
         if args.json:
             print(json.dumps(status, indent=2, sort_keys=True))
         else:
@@ -297,6 +387,20 @@ def main():
 
     text = " ".join(args.text) if args.text else ("" if args.teach else sys.stdin.read())
     text = text.strip()
+
+    if args.answer:
+        if not text:
+            sys.exit("an answer needs text")
+        try:
+            reply = squawkd_call({"op": "answer", "id": args.answer, "text": text,
+                                  "from": args.agent}, timeout=5.0, spawn=False)
+        except (OSError, RuntimeError, json.JSONDecodeError):
+            sys.exit("no multiplexer daemon running (so no pending questions)")
+        if not reply.get("ok"):
+            sys.exit(reply.get("error", "answer failed"))
+        print(f"answered {reply['id']}")
+        return
+
     if not text:
         sys.exit(0)
     if args.relay or args.request:
@@ -304,6 +408,41 @@ def main():
                         kind="request" if args.request else "relay")
         print(f"queued for channel ({request['id']})")
         return
+
+    use_daemon = not args.local and not os.environ.get("SQUAWK_NO_DAEMON")
+    if args.ask or use_daemon:
+        payload = {
+            "op": "ask" if args.ask else "speak",
+            "text": text,
+            "agent": args.agent,
+            "voice": args.voice,
+            "rate": args.rate,
+            "announce": args.announce,
+            "session": args.session or detect_session(),
+            "source": args.source or detect_source(),
+            "project": args.project or Path.cwd().name,
+            "priority": PRIORITIES[args.priority],
+            "wait": not args.no_wait,
+            "timeout": args.timeout,
+        }
+        socket_timeout = args.timeout + 60 if args.ask else (1800 if not args.no_wait else 20)
+        try:
+            reply = squawkd_call(payload, timeout=socket_timeout)
+        except (OSError, RuntimeError, json.JSONDecodeError) as exc:
+            if args.ask:
+                sys.exit(f"multiplexer unavailable, can't ask: {exc}")
+            print(f"multiplexer unavailable ({exc}); speaking locally", file=sys.stderr)
+            speak(text, agent=args.agent, rate=args.rate, voice=args.voice,
+                  announce=args.announce)
+            return
+        if args.ask:
+            if reply.get("timed_out") or not reply.get("ok"):
+                sys.exit(f"no answer within {args.timeout:.0f}s")
+            print(reply.get("answer", ""))
+        elif args.no_wait:
+            print(f"queued ({reply.get('id')})")
+        return
+
     speak(text, agent=args.agent, rate=args.rate, voice=args.voice, announce=args.announce)
 
 

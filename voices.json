@@ -1,4 +1,14 @@
 {
   "assistant": "default",
-  "scout": "kokoro:af_heart"
+  "scout": "kokoro:af_heart",
+  "claude-retailaer-servicedesk-v3": "kokoro:am_michael",
+  "claude-retailaer": "kokoro:bf_emma",
+  "claude-squawk": "Ava (Premium)",
+  "claude": "kokoro:am_puck",
+  "claude-carercare": "kokoro:bm_george",
+  "claude-claude-project-carercare": "kokoro:bf_isabella",
+  "claude-userhappy": "kokoro:bf_emma",
+  "userhappy-cedar-4521": "Ava (Premium)",
+  "Cedar": "kokoro:af_heart",
+  "claude-code": "Isha (Premium)"
 }
