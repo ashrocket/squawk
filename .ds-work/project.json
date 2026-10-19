@@ -1,0 +1,11 @@
+{
+ "n": "squawk",
+ "target": "design-system",
+ "mode": "formalize",
+ "brief": "Formalize the live site styles.css:3-11 (paper #eeede5, ink #242822, orange #dc492c, orange-dark #ba371e, muted #656960, line #d4d5c9, dark #242b24, system sans, ui-monospace signal layer). The six archived directions in site/archive/brand are not the system: mention once. Copy site/public/radio.svg and icon.png. Hero = squawk.raiteri.net first screen.",
+ "ruling": "The tracked eyebrow is real source styling (ruling 2): keep it, cite tokens.css/source line. Remove the second mention of the six archived directions from SOURCES.md.",
+ "defects": [
+  "components/Hero/preview.html:88 renders the eyebrow 'Open source \u00b7 Made for macOS' as a tracked ALL-CAPS label. The .eyebrow rule in tokens.css:36 sets text-transform: uppercase and letter-spacing: 1.25px. SPEC lists tracked all-caps eyebrows as a generic tell with no exception. The system records an exception at tokens.json:129 and README.md:56, but the check has no exception clause.",
+  "SOURCES.md:23 mentions the six archived brand directions a second time. The brief says to mention them once. README.md:5 is the one mention that stays."
+ ]
+}

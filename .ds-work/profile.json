@@ -1,0 +1,48 @@
+{
+  "project": "squawk",
+  "what": "Open-source macOS speech runtime that gives each Codex and Claude Code agent a voice on one shared audio channel. It has a SwiftUI settings app and a public website at squawk.raiteri.net.",
+  "audience": "Mac developers who run several coding agents in cmux and want audible status updates.",
+  "landing_job": "Explain the one-channel voice idea and send the visitor to Get Squawk, the local voice samples, or the public source.",
+  "surfaces": [
+    {"kind": "landing", "where": "site/public/index.html (hero starts at line 27)"},
+    {"kind": "docs-site", "where": "site/public/docs/*.html"},
+    {"kind": "mac-app", "where": "app/Sources/Squawk (SwiftUI settings app, app/build_app.sh)"},
+    {"kind": "cli", "where": "speak.py, voice, handsfree, squawkd.py"}
+  ],
+  "public_url": "https://squawk.raiteri.net",
+  "brand_family": "",
+  "logo_files": ["site/public/radio.svg", "site/public/icon.png", "app/Squawk.iconset/icon_512x512@2x.png"],
+  "existing_ds": {
+    "paths": ["site/archive/brand/index.html (six archived brand directions, not a system)", "site/archive/brand/swipe.html (archived brand preview)"],
+    "has_readme_brandbook": false,
+    "has_tokens": false,
+    "has_cover_or_specimen": false,
+    "has_hero_pattern": false,
+    "has_logo_rules": false,
+    "published_artifact": ""
+  },
+  "identity": {
+    "coherent": true,
+    "palette": [
+      {"role": "paper (page ground)", "value": "#eeede5", "cite": "site/public/styles.css:3"},
+      {"role": "ink (body text)", "value": "#242822", "cite": "site/public/styles.css:5"},
+      {"role": "orange (accent, primary button, h1 span)", "value": "#dc492c", "cite": "site/public/styles.css:8"},
+      {"role": "orange-dark (button hover)", "value": "#ba371e", "cite": "site/public/styles.css:9"},
+      {"role": "muted (secondary text)", "value": "#656960", "cite": "site/public/styles.css:6"},
+      {"role": "line (rules and borders)", "value": "#d4d5c9", "cite": "site/public/styles.css:7"},
+      {"role": "dark (dark panels)", "value": "#242b24", "cite": "site/public/styles.css:11"},
+      {"role": "green (soft highlight)", "value": "#d8e7b5", "cite": "site/public/styles.css:10"}
+    ],
+    "type": [
+      {"role": "body and headings", "family": "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif (system stack, no webfont)", "cite": "site/public/styles.css:25"},
+      {"role": "eyebrows, code and labels", "family": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", "cite": "site/public/styles.css:12"},
+      {"role": "wordmark (800 weight, 31px, -1.7px tracking)", "family": "system sans (inherits body stack)", "cite": "site/public/styles.css:86"},
+      {"role": "hero h1 (clamp 56px to 88px, -5px tracking)", "family": "system sans (inherits body stack)", "cite": "site/public/styles.css:141"}
+    ],
+    "look": "Warm paper ground with a single vermilion accent, a monospace signal layer and a radio-receiver illustration. The palette and mark are consistent across the landing page and the radio.svg icon."
+  },
+  "design_system_dir_conflict": "",
+  "classification": "formalize_from_code",
+  "v2_case": "The site has no design-system folder, and the brand exploration in site/archive/brand/index.html shows six unused directions. The live site uses one coherent set of tokens in styles.css:3-11, so the system can be formalized without new choices. The primary button sets #fff text on #dc492c (site/public/styles.css:177-178), which measures 4.17:1 at 14px. That fails the 4.5:1 text rule for small text.",
+  "notes": "Landing is in site/public. The gallery and archive pages are not the landing. README.md gives the product claims. No claude.ai artifact or design URL found. Site has no logo beyond radio.svg, which it uses at 35px in the header (site/public/index.html:21)."
+}

@@ -1,0 +1,42 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Squawk cover</title>
+  <link rel="stylesheet" href="../../tokens.css">
+  <style>
+    html, body { margin: 0; }
+    body { width: 960px; height: 288px; overflow: hidden; background: var(--paper); }
+    svg { display: block; width: 960px; height: 288px; }
+    .f-dark { fill: var(--dark); }
+    .f-orange { fill: var(--orange); }
+    .f-green { fill: var(--green); }
+    .f-ink { fill: var(--ink); }
+    .rule { stroke: var(--line); stroke-width: 1; }
+    .name { font-family: var(--font-sans); font-weight: 800; font-size: 96px; letter-spacing: -5px; fill: var(--ink); }
+    .name-dot { fill: var(--orange); }
+    .tagline { font-family: var(--font-sans); font-size: 13px; fill: var(--muted); }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 960 288" width="960" height="288" role="img" aria-label="Squawk">
+    <!-- Derivation: four solid blocks from the site colours, dark (styles.css:11), orange (styles.css:8), green (styles.css:10) and ink (styles.css:5). -->
+    <!-- Arrangement: one tall dark block top right, with orange, green and ink blocks in a base row, all right of x=480. Block areas differ, so no row of equal squares. The dark block ends at y=172, a 4px paper gap above the base row, so the ink block does not merge with it. The green block is 80 wide, not 120, so it differs from the orange block. -->
+    <!-- Pattern: six hairlines over the dark block, drawn in the line token (styles.css:7). They echo the radio frequency scale (styles.css:288-300), because the README names the brand as a signal layer. -->
+    <!-- Steps and radii: none. Blocks are square, as the site uses no radius on its panels here. -->
+    <rect class="f-dark" x="600" y="0" width="360" height="172"/>
+    <rect class="f-orange" x="480" y="176" width="120" height="112"/>
+    <rect class="f-green" x="600" y="176" width="80" height="112"/>
+    <rect class="f-ink" x="720" y="176" width="240" height="112"/>
+    <line class="rule" x1="616" y1="24" x2="944" y2="24"/>
+    <line class="rule" x1="616" y1="48" x2="944" y2="48"/>
+    <line class="rule" x1="616" y1="72" x2="944" y2="72"/>
+    <line class="rule" x1="616" y1="96" x2="944" y2="96"/>
+    <line class="rule" x1="616" y1="120" x2="944" y2="120"/>
+    <line class="rule" x1="616" y1="144" x2="944" y2="144"/>
+    <text class="name" x="40" y="222">squawk<tspan class="name-dot">.</tspan></text>
+    <text class="tagline" x="40" y="260">Voices for Codex and Claude Code. One audio channel.</text>
+  </svg>
+</body>
+</html>
