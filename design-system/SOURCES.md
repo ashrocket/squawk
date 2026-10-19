@@ -20,7 +20,7 @@ Project root: the squawk project folder, which is the parent of this `design-sys
 
 ## Not read
 
-- The project `README.md`, `app/` sources, `site/public/docs/*`, `site/archive/brand/*` and the other site pages. The brief limits the system to the live landing page and its tokens. The six archived brand directions were not read and are not the system.
+- The project `README.md`, `app/` sources, `site/public/docs/*`, `site/archive/brand/*` and the other site pages. The brief limits the system to the live landing page and its tokens.
 
 ## Generated
 
